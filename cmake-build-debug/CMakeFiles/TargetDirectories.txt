@@ -1,0 +1,3 @@
+C:/Users/DominikRödler/CLionProjects/gorpC/cmake-build-debug/CMakeFiles/gorpC.dir
+C:/Users/DominikRödler/CLionProjects/gorpC/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/DominikRödler/CLionProjects/gorpC/cmake-build-debug/CMakeFiles/rebuild_cache.dir
