@@ -103,51 +103,78 @@ void insertElement(Element *head, struct tm date, char *name) {
 int validateDate(struct tm date) {
     time_t rawtime;
     struct tm *nowtime;
-    int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = tage im monat gültig    time ( &rawtime );
+    int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = zwischenstatus
+    time ( &rawtime );
     nowtime = localtime(&rawtime);
     nowtime->tm_year += 1900;
-    if (date.tm_year == nowtime->tm_year) {
-        if (date.tm_mon == nowtime->tm_mon) {
-            if (date.tm_mday == nowtime->tm_mday) {
-                if (date.tm_hour >= nowtime->tm_hour)
-                    status = 4;
-                else status = 0;
-            }                                           ///noch nicht fertig!!!!        }
-            else status = 0;
-        } else {
-            if (date.tm_year > nowtime->tm_year)
-                status = 4;
-            else status = 0;
-        }
-        if (0 < date.tm_mon <= 12 && status == 4)//Jahr und monat in ordnung plus tag    {
-            status = 1;
-        if (date.tm_mon == 1 || date.tm_mon == 3 || date.tm_mon == 5 || date.tm_mon == 7 || date.tm_mon == 9 ||
-            date.tm_mon == 11) {
+
+
+//überprüfen, ob das Datum/Uhrzeit stimmt
+    if (date.tm_mon == 1 || date.tm_mon == 3 || date.tm_mon == 5 || date.tm_mon == 7 || date.tm_mon == 9 ||
+        date.tm_mon == 11) {
+        if (0 < date.tm_mday <= 31)
+            status = 0;
+        else status = 1;
+    } else {
+        if (date.tm_mon == 4 || date.tm_mon == 6 || date.tm_mon == 8 || date.tm_mon == 10 ||
+            date.tm_mon == 12) {
             if (0 < date.tm_mday <= 31)
                 status = 0;
             else status = 1;
         } else {
-            if (date.tm_mon == 4 || date.tm_mon == 6 || date.tm_mon == 8 || date.tm_mon == 10 ||
-                date.tm_mon == 12) {
-                if (0 < date.tm_mday <= 31)
-                    status = 0;
-                else status = 1;
-            } else {
-                if (date.tm_mon == 2) {
-                    if (date.tm_year % 4 == 0 && date.tm_year % 100 != 0 || date.tm_year % 400 == 0) {
-                        if (0 < date.tm_mday <= 28)
-                            status = 0;
-                        else status = 1;
-                    }
+            if (date.tm_mon == 2) {
+                if (date.tm_year % 4 == 0 && date.tm_year % 100 != 0 || date.tm_year % 400 == 0) {
+                    if (0 < date.tm_mday <= 28)
+                        status = 0;
+                    else status = 1;
                 }
             }
         }
-    } else status = 1;
-    if (status == 0)
-        status = 1;
+    }
+
+
     if (0 <= date.tm_hour <= 24)
-        if (0 <= date.tm_min <= 59)
+    {
+        if (0 <= date.tm_min <= 59) {
             status = 0;
+        }else
+            status = 1;
+    }
+    else
+        status = 1;
+
+
+//überprüfen, ob das Datum bereits vergangen ist
+    if(status==0)
+    {
+        if (date.tm_year == nowtime->tm_year) {
+            if (date.tm_mon == nowtime->tm_mon) {
+                if (date.tm_mday == nowtime->tm_mday) {
+                    if (date.tm_hour >= nowtime->tm_hour)
+                        status = 0;
+                    else
+                        status = 4;
+                }                                           ///noch nicht fertig!!!!        }
+                else
+                    status = 4;
+            }
+            else
+                status=4;
+        } else
+            status = 4;
+
+        if(status ==4)
+        {
+            if (date.tm_year > nowtime->tm_year) {
+                if (date.tm_mon > nowtime->tm_mon) {
+                    if (date.tm_mday > nowtime->tm_mday) {
+                        if (date.tm_hour > nowtime->tm_hour)
+                            status = 0;
+                    }}}
+            if(status==4)
+                status=2;
+        }
+    }
     return status;
 }
 
