@@ -19,7 +19,6 @@ typedef struct {
 } List;
 
 
-
 typedef struct List;
 
 int validateDate();
@@ -29,7 +28,7 @@ void insertElement();
 List *createList();
 
 
-List* list;
+List *list;
 bool listerstellt = false;
 
 
@@ -41,29 +40,36 @@ int main() {
         scanf("%d", &menuPoint);
         switch (menuPoint) {
             case 1:
-               list = createList();
-               if(list!=NULL)
-               {
-                   printf("Liste wurde erstell");
-                   listerstellt = true;
-               }
-               else
-                   printf("Error, liste konnte nicht erstellt werden!");
+                if (listerstellt = false) {
+                    list = createList();
+                    if (list != NULL) {
+                        printf("Liste wurde erstell");
+                        listerstellt = true;
+                    }
+                } else
+                    printf("Error, liste konnte nicht erstellt werden!");
 
                 // List *list = createList();
                 break;
             case 3:
                 printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
                 char *appointmentBezeichnung[50];
+                char *appointmentBeschreibung[300];
                 scanf("%s", appointmentBezeichnung);
                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
                 struct tm date;
                 scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
-                printf("Bitte geben sie Uhrzeit ein.\n");
+                printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
                 switch (validateDate(date)) {
                     case 0:
-                        printf("passt");
+                        printf("Datum in ordnung.\n Bitte geben sie nun eine Beschreibung ein.");
+                        scanf("%s", appointmentBeschreibung);
+
+
+                        insertElement(list->head, date, appointmentBezeichnung, appointmentBeschreibung);
+
+
 
                         //Datum gültig                        insertElement();
                         break;
@@ -93,10 +99,25 @@ int main() {
     } while (1 == 1);
 }
 
-void insertElement(Element *head, struct tm date, char *name) {
+void insertElement(Element *head, struct tm date, char *name, char *description) {
+
+
     Element *p = head;
-    while (p->next != p->next->next)             //Script unverstädnlich!!!
+    while (p->next != p->next->next &&
+           p->next->appointment->start < 5)        //5 muss später durch umgewandeltes date ersetzt werden.
         p = p->next;
+
+
+    Appointment *dasf = malloc(sizeof(Appointment));
+    //dasf->start=date;     //erst umwandlung von time_tm zu time t
+    dasf->description = description;
+
+    Element *e = malloc(sizeof(Element));
+    e->appointment = dasf;
+    e->next = p->next;
+    p->next = e;
+
+
 }
 
 
@@ -104,7 +125,7 @@ int validateDate(struct tm date) {
     time_t rawtime;
     struct tm *nowtime;
     int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = zwischenstatus
-    time ( &rawtime );
+    time(&rawtime);
     nowtime = localtime(&rawtime);
     nowtime->tm_year += 1900;
 
@@ -133,20 +154,17 @@ int validateDate(struct tm date) {
     }
 
 
-    if (0 <= date.tm_hour <= 24)
-    {
+    if (0 <= date.tm_hour <= 24) {
         if (0 <= date.tm_min <= 59) {
             status = 0;
-        }else
+        } else
             status = 1;
-    }
-    else
+    } else
         status = 1;
 
 
 //überprüfen, ob das Datum bereits vergangen ist
-    if(status==0)
-    {
+    if (status == 0) {
         if (date.tm_year == nowtime->tm_year) {
             if (date.tm_mon == nowtime->tm_mon) {
                 if (date.tm_mday == nowtime->tm_mday) {
@@ -157,22 +175,22 @@ int validateDate(struct tm date) {
                 }                                           ///noch nicht fertig!!!!        }
                 else
                     status = 4;
-            }
-            else
-                status=4;
+            } else
+                status = 4;
         } else
             status = 4;
 
-        if(status ==4)
-        {
+        if (status == 4) {
             if (date.tm_year > nowtime->tm_year) {
                 if (date.tm_mon > nowtime->tm_mon) {
                     if (date.tm_mday > nowtime->tm_mday) {
                         if (date.tm_hour > nowtime->tm_hour)
                             status = 0;
-                    }}}
-            if(status==4)
-                status=2;
+                    }
+                }
+            }
+            if (status == 4)
+                status = 2;
         }
     }
     return status;
