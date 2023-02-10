@@ -19,7 +19,7 @@ typedef struct {
 } List;
 
 
-typedef struct List;
+//typedef struct List;
 
 int validateDate();
 
@@ -34,6 +34,7 @@ bool listerstellt = false;
 
 int main() {
     //Daten einlesen
+    setbuf(stdout, 0);
     printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\t\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
     do {
         int menuPoint = 3;
@@ -58,7 +59,7 @@ int main() {
                 printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
                 char *appointmentBezeichnung[50];
                 char *appointmentBeschreibung[300];
-                //scanf("%s", appointmentBezeichnung);
+                scanf("%s", appointmentBezeichnung);
                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
                 struct tm date;
                 scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
@@ -137,8 +138,6 @@ int validateDate(struct tm date, struct tm *date2) {
     nowtime = localtime(&rawtime);
     nowtime->tm_year += 1900;
 
-    printf("%d", status);
-
 
 
 
@@ -157,6 +156,11 @@ int validateDate(struct tm date, struct tm *date2) {
         } else {
             if (date.tm_mon == 2) {
                 if (date.tm_year % 4 == 0 && date.tm_year % 100 != 0 || date.tm_year % 400 == 0) {
+                    if (0 < date.tm_mday <= 28)
+                        status = 0;
+                    else status = 1;
+                }
+                else{
                     if (0 < date.tm_mday <= 28)
                         status = 0;
                     else status = 1;
