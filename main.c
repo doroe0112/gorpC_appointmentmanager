@@ -65,13 +65,15 @@ int main() {
                 scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
-                int x = validateDate(date, date);
+                int x = validateDate(date);
                 printf("angekommen: %d           \n", x);
                 switch (x) {
                     case 0:
                         printf("Datum in ordnung.\n Bitte geben sie nun eine Beschreibung ein.");
                         scanf("%s", appointmentBeschreibung);
 
+                        if (listerstellt == false)
+                            createList();
 
                         insertElement(list->head, date, appointmentBezeichnung, appointmentBeschreibung);
 
@@ -130,7 +132,7 @@ void insertElement(Element *head, struct tm *date, char *name, char *description
 }
 
 
-int validateDate(struct tm date, struct tm *date2) {
+int validateDate(struct tm date) {
     time_t rawtime;
     struct tm *nowtime;
     int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = zwischenstatus
@@ -159,9 +161,8 @@ int validateDate(struct tm date, struct tm *date2) {
                     if (0 < date.tm_mday <= 28)
                         status = 0;
                     else status = 1;
-                }
-                else{
-                    if (0 < date.tm_mday <= 28)
+                } else {
+                    if (0 < date.tm_mday <= 27)
                         status = 0;
                     else status = 1;
                 }
@@ -178,36 +179,43 @@ int validateDate(struct tm date, struct tm *date2) {
         status = 1;
 
 
+    int zeitVerganngenAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
+    int zeitVerganngenUntilNow =
+            (nowtime->tm_mday + nowtime->tm_mon * 30 + nowtime->tm_year * 365) * 24 + nowtime->tm_hour;
+
+    if (zeitVerganngenAppointment < zeitVerganngenUntilNow && status == 0)
+        status = 4;
+
 //überprüfen, ob das Datum bereits vergangen ist
-    if (status == 0) {
-        if (date.tm_year == nowtime->tm_year) {
-            if (date.tm_mon == nowtime->tm_mon) {
-                if (date.tm_mday == nowtime->tm_mday) {
-                    if (date.tm_hour >= nowtime->tm_hour)
-                        status = 0;
-                    else
-                        status = 4;
+    /* if (status == 0) {
+         if (date.tm_year == nowtime->tm_year) {
+             if (date.tm_mon == nowtime->tm_mon) {
+                 if (date.tm_mday == nowtime->tm_mday) {
+                     if (date.tm_hour >= nowtime->tm_hour)
+                         status = 0;
+                     else
+                         status = 4;
 
-                }                                           ///noch nicht fertig!!!!        }
-                else
-                    status = 4;
-            } else
-                status = 4;
-        } else
-            status = 4;
+                 }                                           ///noch nicht fertig!!!!        }
+                 else
+                     status = 4;
+             } else
+                 status = 4;
+         } else
+             status = 4;
 
-        if (status == 4) {
-            if (date.tm_year >= nowtime->tm_year) {
-                if (date.tm_mon >= nowtime->tm_mon) {
-                    if (date.tm_mday >= nowtime->tm_mday)
-                    {
-                            status = 0;
-                    }
-                }
-            }
-            if (status == 4) { status = 2; }
-        }
-    }
+         if (status == 4) {
+             if (date.tm_year >= nowtime->tm_year) {
+                 if (date.tm_mon >= nowtime->tm_mon) {
+                     if (date.tm_mday >= nowtime->tm_mday)
+                     {
+                             status = 0;
+                     }
+                 }
+             }
+             if (status == 4) { status = 2; }
+         }
+     }*/
     //int dateconv = mktime(&date);
     //printf("%d rawtimt: %d\ndateconv:%d", status, rawtime, dateconv);
 
