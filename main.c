@@ -73,9 +73,12 @@ int main() {
                         scanf("%s", appointmentBeschreibung);
 
                         if (listerstellt == false)
-                            createList();
+                        {
+                            list=createList();
+                            listerstellt=true;
+                        }
 
-                        insertElement(list->head, date, appointmentBezeichnung, appointmentBeschreibung);
+                        insertElement(&list->head, date, &appointmentBezeichnung, &appointmentBeschreibung);
 
 
 
@@ -109,8 +112,8 @@ int main() {
     } while (1 == 1);
 }
 
-void insertElement(Element *head, struct tm *date, char *name, char *description) {
-    time_t dateconv = mktime(date);
+void insertElement(Element *head, struct tm date, char *name, char *description) {
+    time_t dateconv = mktime(&date);
 
 
     Element *p = head;
@@ -178,6 +181,7 @@ int validateDate(struct tm date) {
     } else
         status = 1;
 
+//überprüfen, ob das Datum bereits vergangen ist
 
     int zeitVerganngenAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
     int zeitVerganngenUntilNow =
@@ -186,41 +190,7 @@ int validateDate(struct tm date) {
     if (zeitVerganngenAppointment < zeitVerganngenUntilNow && status == 0)
         status = 4;
 
-//überprüfen, ob das Datum bereits vergangen ist
-    /* if (status == 0) {
-         if (date.tm_year == nowtime->tm_year) {
-             if (date.tm_mon == nowtime->tm_mon) {
-                 if (date.tm_mday == nowtime->tm_mday) {
-                     if (date.tm_hour >= nowtime->tm_hour)
-                         status = 0;
-                     else
-                         status = 4;
 
-                 }                                           ///noch nicht fertig!!!!        }
-                 else
-                     status = 4;
-             } else
-                 status = 4;
-         } else
-             status = 4;
-
-         if (status == 4) {
-             if (date.tm_year >= nowtime->tm_year) {
-                 if (date.tm_mon >= nowtime->tm_mon) {
-                     if (date.tm_mday >= nowtime->tm_mday)
-                     {
-                             status = 0;
-                     }
-                 }
-             }
-             if (status == 4) { status = 2; }
-         }
-     }*/
-    //int dateconv = mktime(&date);
-    //printf("%d rawtimt: %d\ndateconv:%d", status, rawtime, dateconv);
-
-    //if(rawtime>dateconv)
-    //  status=2;
     return status;
 }
 
