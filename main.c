@@ -28,6 +28,8 @@ void insertElement();
 List *createList();
 
 
+void *deleteList(List *list);
+
 List *list;
 bool listerstellt = false;
 
@@ -38,7 +40,7 @@ int main() {
     printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\t\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
     do {
         int menuPoint = 3;
-        //scanf("%d", &menuPoint);
+        scanf("%d", &menuPoint);
         switch (menuPoint) {
 
             case 1:
@@ -53,6 +55,11 @@ int main() {
                     printf("Error, liste existiert bereits!");
 
                 // List *list = createList();
+                break;
+
+            case 2:
+                list=deleteList(list);
+                printf("Liste gelöscht!");
                 break;
 
             case 3:
@@ -107,10 +114,11 @@ int main() {
         }
 
         printf("\n\n");
-        // ClearInputBuffer();    } while (1);
+        //ClearInputBuffer();    } while (1);
         //struct Element Liste;    return 0;
     } while (1 == 1);
 }
+
 
 void insertElement(Element *head, struct tm date, char *name, char *description) {
     time_t dateconv = mktime(&date);
@@ -170,10 +178,12 @@ int validateDate(struct tm date) {
                     else status = 1;
                 }
             }
+            else
+                status =1;
         }
     }
 
-    if (0 <= date.tm_hour <= 24) {
+    if (0 <= date.tm_hour <= 24&&status==0) {
         if (0 <= date.tm_min <= 59) {
             status = 0;
         } else
@@ -188,7 +198,7 @@ int validateDate(struct tm date) {
             (nowtime->tm_mday + nowtime->tm_mon * 30 + nowtime->tm_year * 365) * 24 + nowtime->tm_hour;
 
     if (zeitVerganngenAppointment < zeitVerganngenUntilNow && status == 0)
-        status = 4;
+        status = 2;
 
 
     return status;
@@ -202,4 +212,15 @@ List *createList() {
     list->head = head;
     list->tail = tail;
     return list;
+}
+
+
+void *deleteList(List *list) {
+    Element *p = list->head->next;
+    while(p !=p->next)
+    {
+        Element *e = p;
+        p=p->next;
+        free(e);
+    }
 }
