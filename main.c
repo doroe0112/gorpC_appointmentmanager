@@ -21,16 +21,19 @@ typedef struct {
 
 //typedef struct List;
 
-int validateDate();
+int validateDate(struct tm);
 
 List insertElement();
 
 List *createList();
 
+Element *findElement(Element *head, char *name);
+
 
 void *deleteList(List *list);
 
 List *list;
+
 bool listerstellt = false;
 
 
@@ -65,18 +68,15 @@ int main() {
             case 3:
                 printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
                 char *appointmentBezeichnung[50];
-                char *appointmentBeschreibung[300];
                 scanf("%s", appointmentBezeichnung);
                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
                 struct tm date;
                 scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
-                int x = validateDate(date);
-                switch (x) {
+
+                switch (validateDate(date)) {
                     case 0:
-                        printf("Datum in ordnung.\n Bitte geben sie nun eine Beschreibung ein.");
-                        scanf("%s", appointmentBeschreibung);
 
                         if (listerstellt == false)
                         {
@@ -84,7 +84,7 @@ int main() {
                             listerstellt=true;
                         }
 
-                        insertElement(list, date, &appointmentBezeichnung, &appointmentBeschreibung);
+                        insertElement(list, date, &appointmentBezeichnung);
 
 
 
@@ -99,6 +99,18 @@ int main() {
                 }
                 break;
 
+            case 4:                                                                             //ACHTUNG! UNVOLLSTÄNDIG -> möglichkeit mehrere gleichnamige appointments zu haben + datumsdarstellung nicht gut!
+            {
+                printf("Element suchen\nBitte geben Sie den Titel ein:\n ");
+                char *bezeichnung[50];
+                scanf("%s",bezeichnung);
+                Element *e = findElement(list->head, bezeichnung);
+                if(e==NULL)
+                    printf("kein Element mit dieser BVeschreibung vorhanden.\n");
+                else
+                    printf("\n===================================\nAppointment:\nBeschreibung:\t %s\nZeit:\t%s",e->appointment->description,
+                       asctime(&e->appointment->start));                                                //schauen, obs funktioniert! (C99 fehler?)
+            }
 
             case 8:
                 printf("\tProgramm Schließen.\nalle Daten werden gespeichert.\nFortfahren?(1=ja;2=nein)\n");
@@ -119,7 +131,7 @@ int main() {
 }
 
 
-List insertElement(List list , struct tm date, char *name, char *description) {
+List insertElement(List list , struct tm date, char *name) {
     //time_t dateconv = mktime(&date);
     int zeitAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
 
@@ -134,7 +146,7 @@ List insertElement(List list , struct tm date, char *name, char *description) {
 
     Appointment *appointment = malloc(sizeof(Appointment));
     appointment->start = zeitAppointment;
-    appointment->description = description;
+    appointment->description = name;
 
     Element *e = malloc(sizeof(Element));
     e->appointment = appointment;
@@ -229,4 +241,15 @@ void *deleteList(List *list) {
             free(e);
         }
     }
+}
+
+Element *findElement(Element *head, char *name)
+{
+    Element *e = head->next;
+    while(e!=e->next)
+    {
+        if(e->appointment->description==name) return e;
+        e = e->next;
+    }
+    return NULL;
 }
