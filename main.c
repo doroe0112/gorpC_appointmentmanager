@@ -37,14 +37,14 @@ bool listerstellt = false;
 int main() {
     //Daten einlesen
     setbuf(stdout, 0);
-    printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\t\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
+    printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
     do {
         int menuPoint = 3;
         scanf("%d", &menuPoint);
         switch (menuPoint) {
 
             case 1:
-                if (listerstellt = false) {
+                if (listerstellt == false) {
                     list = createList();
                     if (list != NULL) {
                         printf("Liste wurde erstell");
@@ -73,7 +73,6 @@ int main() {
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
                 int x = validateDate(date);
-                printf("angekommen: %d           \n", x);
                 switch (x) {
                     case 0:
                         printf("Datum in ordnung.\n Bitte geben sie nun eine Beschreibung ein.");
@@ -121,17 +120,21 @@ int main() {
 
 
 void insertElement(Element *head, struct tm date, char *name, char *description) {
-    time_t dateconv = mktime(&date);
+    //time_t dateconv = mktime(&date);
+    int zeitAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
+
 
 
     Element *p = head;
+    //p = p->next;
+
     while (p->next != p->next->next &&
-           p->next->appointment->start < dateconv)
+           p->next->appointment->start < zeitAppointment)
         p = p->next;
 
 
     Appointment *appointment = malloc(sizeof(Appointment));
-    appointment->start = dateconv;
+    appointment->start = zeitAppointment;
     appointment->description = description;
 
     Element *e = malloc(sizeof(Element));
@@ -211,16 +214,20 @@ List *createList() {
     head->next = head->next = tail;
     list->head = head;
     list->tail = tail;
+
+    //tail->appointment->start=malloc(sizeof(Appointment));
+    //tail->appointment->start=	2147483647;
     return list;
 }
 
 
 void *deleteList(List *list) {
+    if(list!=NULL) {
     Element *p = list->head->next;
-    while(p !=p->next)
-    {
-        Element *e = p;
-        p=p->next;
-        free(e);
+            while (p != p->next) {
+            Element *e = p;
+            p = p->next;
+            free(e);
+        }
     }
 }
