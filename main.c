@@ -126,7 +126,6 @@ List insertElement(List list , struct tm date, char *name, char *description) {
 
 
     Element *p = list.head;
-    //p = p->next;
 
     while (p->next != p->next->next &&
            p->next->appointment->start < zeitAppointment)
