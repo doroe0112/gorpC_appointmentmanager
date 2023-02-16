@@ -32,6 +32,8 @@ Element *findElement(Element *head, char *name);
 
 void *deleteList(List *list);
 
+void deleteElement();
+
 List *list;
 
 bool listerstellt = false;
@@ -108,8 +110,16 @@ int main() {
                 if(e==NULL)
                     printf("kein Element mit dieser BVeschreibung vorhanden.\n");
                 else
-                    printf("\n===================================\nAppointment:\nBeschreibung:\t %s\nZeit:\t%s",e->appointment->description,
+                    printf("\n===================================\nAppointment:\nBeschreibung:\t %s\nZeit:\t%s\n===================================\n",e->appointment->description,
                        asctime(&e->appointment->start));                                                //schauen, obs funktioniert! (C99 fehler?)
+            }
+
+            case 5:
+            {
+                printf("Element löschen\nBitte geben Sie den Titel ein:\n ");
+                char *bezeichnung[50];
+                scanf("%s",bezeichnung);
+                deleteElement(bezeichnung);             //testen
             }
 
             case 8:
@@ -124,7 +134,7 @@ int main() {
                 fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
         }
 
-        printf("\n\n");
+        printf("\n\n_____\n");
         //ClearInputBuffer();    } while (1);
         //struct Element Liste;    return 0;
     } while (1 == 1);
@@ -252,4 +262,20 @@ Element *findElement(Element *head, char *name)
         e = e->next;
     }
     return NULL;
+}
+
+
+void deleteElement(Element *head, char *name)
+{
+    Element *p = head;
+    while(p->next != p->next->next)
+    {
+        if(p->next->appointment->description == name)
+        {
+            Element  *e = p->next;
+            p->next=e->next;
+            free (e);
+        }
+        else p = p->next;
+    }
 }
