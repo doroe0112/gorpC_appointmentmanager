@@ -23,7 +23,7 @@ typedef struct {
 
 int validateDate();
 
-void insertElement();
+List insertElement();
 
 List *createList();
 
@@ -84,7 +84,7 @@ int main() {
                             listerstellt=true;
                         }
 
-                        insertElement(&list->head, date, &appointmentBezeichnung, &appointmentBeschreibung);
+                        insertElement(list, date, &appointmentBezeichnung, &appointmentBeschreibung);
 
 
 
@@ -119,13 +119,13 @@ int main() {
 }
 
 
-void insertElement(Element *head, struct tm date, char *name, char *description) {
+List insertElement(List list , struct tm date, char *name, char *description) {
     //time_t dateconv = mktime(&date);
     int zeitAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
 
 
 
-    Element *p = head;
+    Element *p = list.head;
     //p = p->next;
 
     while (p->next != p->next->next &&
@@ -142,7 +142,7 @@ void insertElement(Element *head, struct tm date, char *name, char *description)
     e->next = p->next;
     p->next = e;
 
-
+    return list;
 }
 
 
@@ -211,7 +211,7 @@ List *createList() {
     Element *head = malloc(sizeof(Element));
     Element *tail = malloc(sizeof(Element));
     List *list = malloc(sizeof(List));
-    head->next = head->next = tail;
+    head->next = tail->next = tail;
     list->head = head;
     list->tail = tail;
 
