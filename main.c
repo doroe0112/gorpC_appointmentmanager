@@ -21,27 +21,38 @@ typedef struct {
 
 //typedef struct List;
 
-int validateDate(struct tm);
+int validateDate(struct tm,struct tm);
 
-List insertElement();
+List *insertElement();
 
 List *createList();
 
-Element *findElement(Element *head, char *name);
-
+Element *findElement();
 
 void *deleteList(List *list);
 
 void deleteElement();
 
+void printList();
+
 List *list;
 
-bool listerstellt = false;
+
 
 
 int main() {
     //Daten einlesen
     setbuf(stdout, 0);
+
+    bool listerstellt = false;
+    time_t rawtime;
+    struct tm *nowtime;
+    time(&rawtime);
+    nowtime = localtime(&rawtime);
+    nowtime->tm_year += 1900;
+
+
+
     printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
     do {
         int menuPoint = 3;
@@ -63,7 +74,7 @@ int main() {
                 break;
 
             case 2:
-                list=deleteList(list);
+                list = deleteList(list);
                 printf("Liste gelöscht!");
                 break;
 
@@ -71,22 +82,23 @@ int main() {
                 printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
                 char *appointmentBezeichnung[50];
                 scanf("%s", appointmentBezeichnung);
+
+
                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
                 struct tm date;
                 scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
 
-                switch (validateDate(date)) {
+                switch (validateDate(date,*nowtime)) {
                     case 0:
 
-                        if (listerstellt == false)
-                        {
-                            list=createList();
-                            listerstellt=true;
+                        if (listerstellt == false) {
+                            list = createList();
+                            listerstellt = true;
                         }
 
-                        insertElement(list, date, &appointmentBezeichnung);
+                        list = insertElement(list, date, &appointmentBezeichnung);
 
 
 
@@ -102,25 +114,50 @@ int main() {
                 break;
 
             case 4:                                                                             //ACHTUNG! UNVOLLSTÄNDIG -> möglichkeit mehrere gleichnamige appointments zu haben + datumsdarstellung nicht gut!
-            {
+
                 printf("Element suchen\nBitte geben Sie den Titel ein:\n ");
                 char *bezeichnung[50];
-                scanf("%s",bezeichnung);
-                Element *e = findElement(list->head, bezeichnung);
-                if(e==NULL)
-                    printf("kein Element mit dieser BVeschreibung vorhanden.\n");
+                scanf("%s", bezeichnung);
+                Element *e = findElement(list, bezeichnung);
+
+                //char str[26];
+                //ctime_s(str, sizeof str, &e->appointment->start);
+                //printf("%s", str);
+
+                if (e == NULL)
+                    printf("kein Element mit dieser Beschreibung vorhanden.\n");
                 else
-                    printf("\n===================================\nAppointment:\nBeschreibung:\t %s\nZeit:\t%s\n===================================\n",e->appointment->description,
-                       asctime(&e->appointment->start));                                                //schauen, obs funktioniert! (C99 fehler?)
-            }
+                    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t%s\nnext Element:\t%s\n===================================\n",
+                           e->appointment->description,
+                           ctime(&e->appointment->start),
+                           e->next->appointment->description);
+                break;//schauen, obs funktioniert! (C99 fehler?)
+
 
             case 5:
-            {
                 printf("Element löschen\nBitte geben Sie den Titel ein:\n ");
-                char *bezeichnung[50];
-                scanf("%s",bezeichnung);
-                deleteElement(bezeichnung);             //testen
-            }
+                char *bezeichnung5[50];
+                scanf("%s", bezeichnung5);
+                deleteElement(list, bezeichnung5);             //testen
+                break;
+
+            case 6:
+
+
+
+                break;
+
+
+            case 7:
+                printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
+                int day;
+                int mon;
+                int year;
+                scanf("%d.%d.%d", &day, &mon, &year);
+                printList(list, day, mon, year,*nowtime);
+
+
+                break;
 
             case 8:
                 printf("\tProgramm Schließen.\nalle Daten werden gespeichert.\nFortfahren?(1=ja;2=nein)\n");
@@ -130,24 +167,54 @@ int main() {
                     exit(0);
                 } else printf("abgebrochen.");
                 break;
+
+                fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
+
             default:
                 fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
-        }
+                break;
 
-        printf("\n\n_____\n");
-        //ClearInputBuffer();    } while (1);
-        //struct Element Liste;    return 0;
+                printf("_____________\n\n\n");
+                //ClearInputBuffer();    } //while (1);
+                //struct Element Liste;    return 0;
+        }
     } while (1 == 1);
 }
 
+void printList(List list, int day, int mon, int year, struct tm *nowtime) {
+    Element *e = list.head->next;
 
-List insertElement(List list , struct tm date, char *name) {
+    if(day==mon==year==0)
+    {
+        while (e != e->next)
+            printf("Appointment %s ist am %d",e->appointment->description,e->appointment->start);
+    }
+    else
+    {
+        struct tm date;
+        date.tm_mday=day;
+        date.tm_mon=mon;
+        date.tm_year=year;
+
+        while(e != e-> next)
+        {
+            if(nowtime->tm_year==date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
+                printf("Appointment %s ist am %d",e->appointment->description,e->appointment->start);
+
+        }
+
+    }
+
+
+}
+
+
+List *insertElement(List *list, struct tm date, char *name) {
     //time_t dateconv = mktime(&date);
     int zeitAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
 
 
-
-    Element *p = list.head;
+    Element *p = list->head;
 
     while (p->next != p->next->next &&
            p->next->appointment->start < zeitAppointment)
@@ -167,15 +234,9 @@ List insertElement(List list , struct tm date, char *name) {
 }
 
 
-int validateDate(struct tm date) {
-    time_t rawtime;
-    struct tm *nowtime;
+int validateDate(struct tm date, struct tm nowtime) {
+
     int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = zwischenstatus
-    time(&rawtime);
-    nowtime = localtime(&rawtime);
-    nowtime->tm_year += 1900;
-
-
 
 
 //überprüfen, ob das Datum/Uhrzeit stimmt
@@ -201,13 +262,12 @@ int validateDate(struct tm date) {
                         status = 0;
                     else status = 1;
                 }
-            }
-            else
-                status =1;
+            } else
+                status = 1;
         }
     }
 
-    if (0 <= date.tm_hour <= 24&&status==0) {
+    if (0 <= date.tm_hour <= 24 && status == 0) {
         if (0 <= date.tm_min <= 59) {
             status = 0;
         } else
@@ -219,7 +279,7 @@ int validateDate(struct tm date) {
 
     int zeitVerganngenAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
     int zeitVerganngenUntilNow =
-            (nowtime->tm_mday + nowtime->tm_mon * 30 + nowtime->tm_year * 365) * 24 + nowtime->tm_hour;
+            (nowtime.tm_mday + nowtime.tm_mon * 30 + nowtime.tm_year * 365) * 24 + nowtime.tm_hour;
 
     if (zeitVerganngenAppointment < zeitVerganngenUntilNow && status == 0)
         status = 2;
@@ -243,9 +303,9 @@ List *createList() {
 
 
 void *deleteList(List *list) {
-    if(list!=NULL) {
-    Element *p = list->head->next;
-            while (p != p->next) {
+    if (list != NULL) {
+        Element *p = list->head->next;
+        while (p != p->next) {
             Element *e = p;
             p = p->next;
             free(e);
@@ -253,29 +313,23 @@ void *deleteList(List *list) {
     }
 }
 
-Element *findElement(Element *head, char *name)
-{
-    Element *e = head->next;
-    while(e!=e->next)
-    {
-        if(e->appointment->description==name) return e;
+Element *findElement(List list, char *name) {
+    Element *e = list.head->next;
+    while (e != e->next) {
+        if (e->appointment->description == name) return e;
         e = e->next;
     }
     return NULL;
 }
 
 
-void deleteElement(Element *head, char *name)
-{
-    Element *p = head;
-    while(p->next != p->next->next)
-    {
-        if(p->next->appointment->description == name)
-        {
-            Element  *e = p->next;
-            p->next=e->next;
-            free (e);
-        }
-        else p = p->next;
+void deleteElement(List list, char *name) {
+    Element *p = list.head;
+    while (p->next != p->next->next) {
+        if (p->next->appointment->description == name) {
+            Element *e = p->next;
+            p->next = e->next;
+            free(e);
+        } else p = p->next;
     }
 }
