@@ -21,7 +21,7 @@ typedef struct {
 
 //typedef struct List;
 
-int validateDate(struct tm,struct tm);
+int validateDate(struct tm, struct tm);
 
 List *insertElement();
 
@@ -35,22 +35,27 @@ void deleteElement();
 
 void printList();
 
+List *readFile();
+
 List *list;
 
 
-
-
 int main() {
+    perror("dies ist ein Fehlertext");
+
+
     //Daten einlesen
     setbuf(stdout, 0);
 
     bool listerstellt = false;
-    time_t rawtime;
     struct tm *nowtime;
+    time_t rawtime;
     time(&rawtime);
     nowtime = localtime(&rawtime);
     nowtime->tm_year += 1900;
 
+    list = createList();
+    list = readFile(list, rawtime);
 
 
     printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
@@ -90,7 +95,7 @@ int main() {
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
                 scanf("%d:%d", &date.tm_hour, &date.tm_min);
 
-                switch (validateDate(date,*nowtime)) {
+                switch (validateDate(date, *nowtime)) {
                     case 0:
 
                         if (listerstellt == false) {
@@ -144,7 +149,6 @@ int main() {
             case 6:
 
 
-
                 break;
 
 
@@ -154,7 +158,7 @@ int main() {
                 int mon;
                 int year;
                 scanf("%d.%d.%d", &day, &mon, &year);
-                printList(list, day, mon, year,*nowtime);
+                printList(list, day, mon, year, *nowtime);
 
 
                 break;
@@ -181,25 +185,47 @@ int main() {
     } while (1 == 1);
 }
 
+List *readFile(List *list, time_t rawtime) {
+    FILE *file;
+    char *line[300];
+    struct tm date;
+    Element *e;
+    e = list->head->next;
+
+    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "w+");
+
+    if (file == NULL) {
+        perror("error by reading or initialising the file.");
+        return list;
+    }
+
+
+    while(fgets(line,300,file)!=NULL) {
+    scanf("%d;%s",date,e->appointment->description);
+        time(date);
+      //if(zeitrichtig)
+     // insertElement(list,)
+    }
+
+
+
+}
+
 void printList(List list, int day, int mon, int year, struct tm *nowtime) {
     Element *e = list.head->next;
 
-    if(day==mon==year==0)
-    {
+    if (day == mon == year == 0) {
         while (e != e->next)
-            printf("Appointment %s ist am %d",e->appointment->description,e->appointment->start);
-    }
-    else
-    {
+            printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
+    } else {
         struct tm date;
-        date.tm_mday=day;
-        date.tm_mon=mon;
-        date.tm_year=year;
+        date.tm_mday = day;
+        date.tm_mon = mon;
+        date.tm_year = year;
 
-        while(e != e-> next)
-        {
-            if(nowtime->tm_year==date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
-                printf("Appointment %s ist am %d",e->appointment->description,e->appointment->start);
+        while (e != e->next) {
+            if (nowtime->tm_year == date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
+                printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
 
         }
 
