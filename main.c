@@ -29,13 +29,15 @@ List *createList();
 
 Element *findElement();
 
-void *deleteList(List *list);
+List *clearList(List *list);
 
 void deleteElement();
 
 void printList();
 
 List *readFile();
+
+void printAppointment(const Element *e);
 
 List *list;
 
@@ -58,7 +60,8 @@ int main() {
     list = readFile(list, rawtime);
 
 
-    printf("\n\nWelcome by DAP... Dominik's Appointment Planer.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
+    printf("\n\nWelcome by DAP... Dominik's Appointment Plane"
+           "r.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
     do {
         int menuPoint = 3;
         scanf("%d", &menuPoint);
@@ -79,7 +82,7 @@ int main() {
                 break;
 
             case 2:
-                list = deleteList(list);
+                list = clearList(list);
                 printf("Liste gelöscht!");
                 break;
 
@@ -90,12 +93,17 @@ int main() {
 
 
                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
-                struct tm date;
-                scanf("%d.%d.%d", &date.tm_mday, &date.tm_mon, &date.tm_year);
+                struct tm *date;
+                date = nowtime;
+                scanf("%d.%d.%d", &date->tm_mday, &date->tm_mon, &date->tm_year);
                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
-                scanf("%d:%d", &date.tm_hour, &date.tm_min);
+                scanf("%d:%d", &date->tm_hour, &date->tm_min);
 
-                switch (validateDate(date, *nowtime)) {
+            time_t time1;
+            time1= mktime(&date);
+
+
+                switch (validateDate(*date, *nowtime)) {
                     case 0:
 
                         if (listerstellt == false) {
@@ -103,7 +111,7 @@ int main() {
                             listerstellt = true;
                         }
 
-                        list = insertElement(list, date, &appointmentBezeichnung);
+                        list = insertElement(list, time1, &appointmentBezeichnung);
 
 
 
@@ -132,10 +140,7 @@ int main() {
                 if (e == NULL)
                     printf("kein Element mit dieser Beschreibung vorhanden.\n");
                 else
-                    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t%s\nnext Element:\t%s\n===================================\n",
-                           e->appointment->description,
-                           ctime(&e->appointment->start),
-                           e->next->appointment->description);
+                    printAppointment(e);
                 break;//schauen, obs funktioniert! (C99 fehler?)
 
 
@@ -185,6 +190,13 @@ int main() {
     } while (1 == 1);
 }
 
+void printAppointment(const Element *e) {
+    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t%s\nnext Element:\t%s\n===================================\n",
+e->appointment->description,
+ctime(&e->appointment->start),
+e->next->appointment->description);
+}
+
 List *readFile(List *list, time_t rawtime) {
     FILE *file;
     char *line[300];
@@ -201,10 +213,11 @@ List *readFile(List *list, time_t rawtime) {
 
 
     while(fgets(line,300,file)!=NULL) {
-    scanf("%d;%s",date,e->appointment->description);
-        time(date);
+    //scanf("%d;%s",date,e->appointment->description);
+        //time(date);
       //if(zeitrichtig)
      // insertElement(list,)
+     printf("%s",line);
     }
 
 
@@ -235,20 +248,19 @@ void printList(List list, int day, int mon, int year, struct tm *nowtime) {
 }
 
 
-List *insertElement(List *list, struct tm date, char *name) {
+List *insertElement(List *list, time_t time1 , char *name) {
     //time_t dateconv = mktime(&date);
-    int zeitAppointment = (date.tm_mday + date.tm_mon * 30 + date.tm_year * 365) * 24 + date.tm_hour;
 
 
     Element *p = list->head;
 
     while (p->next != p->next->next &&
-           p->next->appointment->start < zeitAppointment)
+           p->next->appointment->start < time1)
         p = p->next;
 
 
     Appointment *appointment = malloc(sizeof(Appointment));
-    appointment->start = zeitAppointment;
+    appointment->start = time1;
     appointment->description = name;
 
     Element *e = malloc(sizeof(Element));
@@ -328,7 +340,7 @@ List *createList() {
 }
 
 
-void *deleteList(List *list) {
+List *clearList(List *list) {
     if (list != NULL) {
         Element *p = list->head->next;
         while (p != p->next) {
@@ -337,6 +349,7 @@ void *deleteList(List *list) {
             free(e);
         }
     }
+    return list;
 }
 
 Element *findElement(List list, char *name) {
