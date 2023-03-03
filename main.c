@@ -61,7 +61,7 @@ int main() {
     // list = readFile(list, rawtime);
 
 
-    printf("Welcome to DAP\nDominiks Appointment Manager\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
+    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
 
     char buf[50];
 

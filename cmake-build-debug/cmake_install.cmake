@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/DominikRödler/CLionProjects/gorpC
+# Install script for directory: C:/Users/User/CLionProjects/gorpC_appointmentmanager
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/DominikRödler/CLionProjects/gorpC/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/User/CLionProjects/gorpC_appointmentmanager/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

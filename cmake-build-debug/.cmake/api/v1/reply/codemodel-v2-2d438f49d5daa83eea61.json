@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/DominikR\u00f6dler/CLionProjects/gorpC/cmake-build-debug",
-		"source" : "C:/Users/DominikR\u00f6dler/CLionProjects/gorpC"
+		"build" : "C:/Users/User/CLionProjects/gorpC_appointmentmanager/cmake-build-debug",
+		"source" : "C:/Users/User/CLionProjects/gorpC_appointmentmanager"
 	},
 	"version" : 
 	{
