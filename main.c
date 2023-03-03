@@ -3,6 +3,7 @@
 #include <utime.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct {
     time_t start;               //die müssen definiert werden, wenn das Element erstellt wird
@@ -43,7 +44,7 @@ List *list;
 
 
 int main() {
-    perror("dies ist ein Fehlertext");
+    //perror("dies ist ein Fehlertext");
 
 
     //Daten einlesen
@@ -60,141 +61,183 @@ int main() {
     list = readFile(list, rawtime);
 
 
-    printf("\n\nWelcome by DAP... Dominik's Appointment Plane"
-           "r.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
+    printf("Welcome to DAP\nDominiks Appointment Manager\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quitt - save appointments and quitt program\n\t->help");
+
+    char buf[50];
+
     do {
-        int menuPoint = 3;
-        scanf("%d", &menuPoint);
-        switch (menuPoint) {
-
-            case 1:
-                if (listerstellt == false) {
-                    list = createList();
-                    if (list != NULL) {
-                        printf("Liste wurde erstell");
-                        listerstellt = true;
-                    } else
-                        printf("Liste konnte nicht erstellt werden.");
-                } else
-                    printf("Error, liste existiert bereits!");
-
-                // List *list = createList();
-                break;
-
-            case 2:
-                list = clearList(list);
-                printf("Liste gelöscht!");
-                break;
-
-            case 3:
-                printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
-                char *appointmentBezeichnung[50];
-                scanf("%s", appointmentBezeichnung);
+        printf("==============");
+        gets(buf);
+        printf("string is: %s\n", buf);
 
 
-                printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
-                struct tm *date;
-                date = nowtime;
-                scanf("%d.%d.%d", &date->tm_mday, &date->tm_mon, &date->tm_year);
-                printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
-                scanf("%d:%d", &date->tm_hour, &date->tm_min);
-
-            time_t time1;
-            time1= mktime(&date);
-
-
-                switch (validateDate(*date, *nowtime)) {
-                    case 0:
-
-                        if (listerstellt == false) {
-                            list = createList();
-                            listerstellt = true;
-                        }
-
-                        list = insertElement(list, time1, &appointmentBezeichnung);
+        if (strcmp("showToday", buf) == 0) {
+            printList(list, 0, 0, 0);     //überarbeiten!!!!
+        } else {
 
 
 
-                        //Datum gültig                        insertElement();
-                        break;
-                    case 1:
-                        printf("Formfehler in Datumsformat");
-                        break;
-                    case 2:
-                        printf("Datum liegt in der Vergangenheit");
-                        break;
+            if (strcmp("show", buf) == 0) {
+                int day;                int month;                int year;
+                scanf("%d.%d.%d", day, month, year);
+                printList(list, day, month, year);
+            }else{
+
+
+                if (strcmp("list", buf) == 0) {
+
                 }
-                break;
-
-            case 4:                                                                             //ACHTUNG! UNVOLLSTÄNDIG -> möglichkeit mehrere gleichnamige appointments zu haben + datumsdarstellung nicht gut!
-
-                printf("Element suchen\nBitte geben Sie den Titel ein:\n ");
-                char *bezeichnung[50];
-                scanf("%s", bezeichnung);
-                Element *e = findElement(list, bezeichnung);
-
-                //char str[26];
-                //ctime_s(str, sizeof str, &e->appointment->start);
-                //printf("%s", str);
-
-                if (e == NULL)
-                    printf("kein Element mit dieser Beschreibung vorhanden.\n");
-                else
-                    printAppointment(e);
-                break;//schauen, obs funktioniert! (C99 fehler?)
+            }
 
 
-            case 5:
-                printf("Element löschen\nBitte geben Sie den Titel ein:\n ");
-                char *bezeichnung5[50];
-                scanf("%s", bezeichnung5);
-                deleteElement(list, bezeichnung5);             //testen
-                break;
-
-            case 6:
-
-
-                break;
-
-
-            case 7:
-                printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
-                int day;
-                int mon;
-                int year;
-                scanf("%d.%d.%d", &day, &mon, &year);
-                printList(list, day, mon, year, *nowtime);
-
-
-                break;
-
-            case 8:
-                printf("\tProgramm Schließen.\nalle Daten werden gespeichert.\nFortfahren?(1=ja;2=nein)\n");
-                scanf("%d", &menuPoint);
-                if (menuPoint == 1) {
-                    //rufe speichern der Liste auf                    printf("Daten gespeichert.\nProgramm wird beendet...");
-                    exit(0);
-                } else printf("abgebrochen.");
-                break;
-
-                fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
-
-            default:
-                fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
-                break;
-
-                printf("_____________\n\n\n");
-                //ClearInputBuffer();    } //while (1);
-                //struct Element Liste;    return 0;
         }
-    } while (1 == 1);
+
+        if (buf == 'test')
+            printf("\npasst\n");
+    } while (true);
+
+
+
+
+
+
+
+
+    /* printf("\n\nWelcome by DAP... Dominik's Appointment Plane"
+            "r.\n\nHauptmenü:\n1. \t neue Liste erstellen\n2.\tListe Leeren\n3.\tElement hinzufügen\n4.\tElement finden\n5.\tElement Löschen\n6.\tgebe Appointment aus\n7.\tgebe Liste aus\n8.\tProgramm Schließen\n\nbitte geben Sie die Zahl der entsprechenden Menüfunktion ein und drücken Sie auf enter.\n=============\n");
+     do {
+         int menuPoint = 3;
+         scanf("%d", &menuPoint);
+         switch (menuPoint) {
+
+             case 1:
+                 if (listerstellt == false) {
+                     list = createList();
+                     if (list != NULL) {
+                         printf("Liste wurde erstell");
+                         listerstellt = true;
+                     } else
+                         printf("Liste konnte nicht erstellt werden.");
+                 } else
+                     printf("Error, liste existiert bereits!");
+
+                 // List *list = createList();
+                 break;
+
+             case 2:
+                 list = clearList(list);
+                 printf("Liste gelöscht!");
+                 break;
+
+             case 3:
+                 printf("\nneues Appointment anlegen.\nBitte geben Sie die Bezeichnung des Appointments an.\n");
+                 char *appointmentBezeichnung[50];
+                 scanf("%s", appointmentBezeichnung);
+
+
+                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
+                 struct tm *date;
+                 date = nowtime;
+                 scanf("%d.%d.%d", &date->tm_mday, &date->tm_mon, &date->tm_year);
+                 printf("Bitte geben sie Uhrzeit ein(hh:mm).\n");
+                 scanf("%d:%d", &date->tm_hour, &date->tm_min);
+
+             time_t time1;
+             time1= mktime(&date);
+
+
+                 switch (validateDate(*date, *nowtime)) {
+                     case 0:
+
+                         if (listerstellt == false) {
+                             list = createList();
+                             listerstellt = true;
+                         }
+
+                         list = insertElement(list, time1, &appointmentBezeichnung);
+
+
+
+                         //Datum gültig                        insertElement();
+                         break;
+                     case 1:
+                         printf("Formfehler in Datumsformat");
+                         break;
+                     case 2:
+                         printf("Datum liegt in der Vergangenheit");
+                         break;
+                 }
+                 break;
+
+             case 4:                                                                             //ACHTUNG! UNVOLLSTÄNDIG -> möglichkeit mehrere gleichnamige appointments zu haben + datumsdarstellung nicht gut!
+
+                 printf("Element suchen\nBitte geben Sie den Titel ein:\n ");
+                 char *bezeichnung[50];
+                 scanf("%s", bezeichnung);
+                 Element *e = findElement(list, bezeichnung);
+
+                 //char str[26];
+                 //ctime_s(str, sizeof str, &e->appointment->start);
+                 //printf("%s", str);
+
+                 if (e == NULL)
+                     printf("kein Element mit dieser Beschreibung vorhanden.\n");
+                 else
+                     printAppointment(e);
+                 break;//schauen, obs funktioniert! (C99 fehler?)
+
+
+             case 5:
+                 printf("Element löschen\nBitte geben Sie den Titel ein:\n ");
+                 char *bezeichnung5[50];
+                 scanf("%s", bezeichnung5);
+                 deleteElement(list, bezeichnung5);             //testen
+                 break;
+
+             case 6:
+
+
+                 break;
+
+
+             case 7:
+                 printf("Bitte legen Sie das Datum für das Appointment %s fest(DD.MM.YYYY).\n", appointmentBezeichnung);
+                 int day;
+                 int mon;
+                 int year;
+                 scanf("%d.%d.%d", &day, &mon, &year);
+                 printList(list, day, mon, year, *nowtime);
+
+
+                 break;
+
+             case 8:
+                 printf("\tProgramm Schließen.\nalle Daten werden gespeichert.\nFortfahren?(1=ja;2=nein)\n");
+                 scanf("%d", &menuPoint);
+                 if (menuPoint == 1) {
+                     //rufe speichern der Liste auf                    printf("Daten gespeichert.\nProgramm wird beendet...");
+                     exit(0);
+                 } else printf("abgebrochen.");
+                 break;
+
+                 fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
+
+             default:
+                 fprintf(stderr, "[Warning]: Eingabe ungültig.\n");
+                 break;
+
+                 printf("_____________\n\n\n");
+                 //ClearInputBuffer();    } //while (1);
+                 //struct Element Liste;    return 0;
+         }
+     } while (1 == 1);*/
 }
 
 void printAppointment(const Element *e) {
     printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t%s\nnext Element:\t%s\n===================================\n",
-e->appointment->description,
-ctime(&e->appointment->start),
-e->next->appointment->description);
+           e->appointment->description,
+           ctime(&e->appointment->start),
+           e->next->appointment->description);
 }
 
 List *readFile(List *list, time_t rawtime) {
@@ -212,35 +255,43 @@ List *readFile(List *list, time_t rawtime) {
     }
 
 
-    while(fgets(line,300,file)!=NULL) {
-    //scanf("%d;%s",date,e->appointment->description);
+    while (fgets(line, 300, file) != NULL) {
+        //scanf("%d;%s",date,e->appointment->description);
         //time(date);
-      //if(zeitrichtig)
-     // insertElement(list,)
-     printf("%s",line);
+        //if(zeitrichtig)
+        // insertElement(list,)
+        printf("%s", line);
     }
-
 
 
 }
 
-void printList(List list, int day, int mon, int year, struct tm *nowtime) {
+void printList(List list, int day, int mon, int year) {
     Element *e = list.head->next;
 
     if (day == mon == year == 0) {
         while (e != e->next)
-            printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
+            printAppointment(e);
     } else {
-        struct tm date;
-        date.tm_mday = day;
-        date.tm_mon = mon;
-        date.tm_year = year;
 
-        while (e != e->next) {
-            if (nowtime->tm_year == date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
-                printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
 
-        }
+        int zeitVerganngenAppointment = (day + mon * 30 + year * 365) * 24;
+        if (mon == 1 || mon == 3 || mon == 5 || mon == 7 || mon == 9 || mon == 11)
+            zeitVerganngenAppointment+=mon*31*24;
+        if(mon==4 || mon == 6 || mon == 8 || mon == 10 || mon == 12)
+            zeitVerganngenAppointment+=mon*30*24;
+        if(mon==2)
+            if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
+                zeitVerganngenAppointment+=mon*12*27
+
+
+
+
+        /* while (e != e->next) {
+             if (nowtime->tm_year == date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
+                 printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
+
+         }*/
 
     }
 
@@ -248,7 +299,7 @@ void printList(List list, int day, int mon, int year, struct tm *nowtime) {
 }
 
 
-List *insertElement(List *list, time_t time1 , char *name) {
+List *insertElement(List *list, time_t time1, char *name) {
     //time_t dateconv = mktime(&date);
 
 
@@ -286,7 +337,7 @@ int validateDate(struct tm date, struct tm nowtime) {
     } else {
         if (date.tm_mon == 4 || date.tm_mon == 6 || date.tm_mon == 8 || date.tm_mon == 10 ||
             date.tm_mon == 12) {
-            if (0 < date.tm_mday <= 31)
+            if (0 < date.tm_mday <= 30)
                 status = 0;
             else status = 1;
         } else {
