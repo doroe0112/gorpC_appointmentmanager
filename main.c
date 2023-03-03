@@ -58,17 +58,16 @@ int main() {
     nowtime->tm_year += 1900;
 
     list = createList();
-    list = readFile(list, rawtime);
+    // list = readFile(list, rawtime);
 
 
-    printf("Welcome to DAP\nDominiks Appointment Manager\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quitt - save appointments and quitt program\n\t->help");
+    printf("Welcome to DAP\nDominiks Appointment Manager\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
 
     char buf[50];
 
     do {
-        printf("==============");
+        printf("==============\n");
         gets(buf);
-        printf("string is: %s\n", buf);
 
 
         if (strcmp("showToday", buf) == 0) {
@@ -76,20 +75,78 @@ int main() {
         } else {
 
 
-
             if (strcmp("show", buf) == 0) {
-                int day;                int month;                int year;
-                scanf("%d.%d.%d", day, month, year);
+                int day;
+                int month;
+                int year;
+                scanf("%d.%d.%d", &day, &month, &year);
                 printList(list, day, month, year);
-            }else{
+            } else {
 
 
                 if (strcmp("list", buf) == 0) {
+                    Element *e = list->head->next;
+                    while (e != e->next)
+                        printAppointment(e);
+                } else {
 
+
+                    if (strcmp("new", buf) == 0) {
+                        struct tm *date;
+                        char *appointmentBezeichnung;
+                        gets(appointmentBezeichnung);
+                        switch (validateDate(*date, *nowtime)) {
+                            case 0:
+                                list = insertElement(list, date, &appointmentBezeichnung);
+                                break;
+                            case 1:
+                                printf("Formfehler in Datumsformat");
+                                break;
+                            case 2:
+                                printf("Datum liegt in der Vergangenheit");
+                                break;
+                        }
+                    } else {
+
+
+                        if (strcmp("search", buf) == 0) {
+                            char *appointmentBezeichnung;
+                            gets(appointmentBezeichnung);
+                            printAppointment(findElement(list, appointmentBezeichnung));
+                        } else {
+
+
+                            if (strcmp("delete", buf) == 0) {
+                                char *appointmentBezeichnung;
+                                gets(appointmentBezeichnung);
+                                deleteElement(list, appointmentBezeichnung);
+                            } else {
+
+
+                                if (strcmp("deleteList", buf) == 0) {
+                                    list = clearList(list);
+                                } else {
+
+
+                                    if (strcmp("quit", buf) == 0) {
+
+                                        //Liste speichern
+                                        exit(0);
+                                    } else {
+
+
+                                        if (strcmp("help", buf) == 0) {
+                                            printf("\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
+                                        }else{
+                                            perror("Input Invalid.");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-
         }
 
         if (buf == 'test')
@@ -269,12 +326,23 @@ List *readFile(List *list, time_t rawtime) {
 void printList(List list, int day, int mon, int year) {
     Element *e = list.head->next;
 
-    if (day == mon == year == 0) {
+    if (day == 0 && mon == 0 && year == 0) {
         while (e != e->next)
             printAppointment(e);
     } else {
 
 
+        time_t inputconverted;
+        struct tm *input;
+        input->tm_mday = day;
+        input->tm_mon = mon;
+        input->tm_year = year;
+        input->tm_hour = input->tm_min = input->tm_sec = 0;
+        inputconverted = mktime(&input);
+
+
+        printf("ghj");
+/*
         int zeitVerganngenAppointment = (day + mon * 30 + year * 365) * 24;
         if (mon == 1 || mon == 3 || mon == 5 || mon == 7 || mon == 9 || mon == 11)
             zeitVerganngenAppointment+=mon*31*24;
@@ -282,7 +350,7 @@ void printList(List list, int day, int mon, int year) {
             zeitVerganngenAppointment+=mon*30*24;
         if(mon==2)
             if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
-                zeitVerganngenAppointment+=mon*12*27
+                zeitVerganngenAppointment+=mon*12*27*/
 
 
 
