@@ -24,6 +24,8 @@ typedef struct {
 
 //typedef struct List;
 
+typedef struct File File;
+
 int validateDate(struct tm, struct tm);
 
 List *insertElement();
@@ -37,6 +39,9 @@ List *clearList(List *list);
 void deleteElement();
 
 void printList();
+
+void writeFile(List *list);
+
 
 List *readFile();
 
@@ -62,7 +67,7 @@ int main() {
     nowtime->tm_year += 1900;
 
     list = createList();
-    list = readFile(list, rawtime,*nowtime);
+    list = readFile(list, rawtime, *nowtime);
 
 
     printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
@@ -96,12 +101,24 @@ int main() {
 
 
                     if (strcmp("new", buf) == 0) {
-                        struct tm *date;
-                        char *appointmentBezeichnung;
+                        time_t nothing = time(NULL);
+                        struct tm *date = localtime(&nothing);
+                        int day;
+                        int month;
+                        int year;
+                        char appointmentBezeichnung[100];
+                        printf("Please Input your appointment description:  ");
                         gets(appointmentBezeichnung);
+                        printf("Please Input the day(dd.mm.yyyy): ");
+                        scanf("%d.%d.%d", &day, &month, &year);
+
+                        date->tm_mday = day;
+                        date->tm_mon = month;
+                        date->tm_year = year;
+
                         switch (validateDate(*date, *nowtime)) {
                             case 0:
-                                list = insertElement(list, date, &appointmentBezeichnung);
+                                list = insertElement(list, date, appointmentBezeichnung);
                                 break;
                             case 1:
                                 printf("Formfehler in Datumsformat");
@@ -133,15 +150,19 @@ int main() {
 
 
                                     if (strcmp("quit", buf) == 0) {
-
+                                        writeFile(list);
                                         //Liste speichern
+                                        list = clearList(list);
+                                        free(list->head);
+                                        free(list->tail);
+
                                         exit(0);
                                     } else {
 
 
                                         if (strcmp("help", buf) == 0) {
                                             printf("\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
-                                        }else{
+                                        } else {
                                             perror("Input Invalid.");
                                         }
                                     }
@@ -157,12 +178,6 @@ int main() {
     } while (true);
 
 
-
-
-
-
-
-
 }
 
 void printAppointment(const Element *e) {
@@ -172,7 +187,8 @@ void printAppointment(const Element *e) {
            e->next->appointment->description);
 }
 
-List *readFile(List *list, time_t rawtime,struct tm nowtime) {
+
+List *readFile(List *list, time_t rawtime, struct tm nowtime) {
     FILE *file;
     char *line[300];
     struct tm date;
@@ -189,33 +205,36 @@ List *readFile(List *list, time_t rawtime,struct tm nowtime) {
 
     char string[100];
 
-    char *appointmentBezeichnung; char *storage;int day; int mon; int year;
+    char *appointmentBezeichnung;
+    char *storage;
 
-    while(fgets(string, 100, file)) {
-        time_t date_t=time(NULL);
-        struct tm *date= localtime(&date_t);
+    while (fgets(string, 100, file)) {
+        time_t date_t;
+        date_t = time(NULL);
+        struct tm *date;
+        date = localtime(&date_t);
         printf("%s\n", string);
 
-        char delimiter[]=";";
-        appointmentBezeichnung=strtok(string,delimiter);
-        storage= strtok(NULL,delimiter);
+        char delimiter[] = ";";
+        appointmentBezeichnung = strtok(string, delimiter);
+        storage = strtok(NULL, delimiter);
         date->tm_mday = atoi(storage);
-        storage= strtok(NULL,delimiter);
-        date->tm_mon=  atoi(storage);
-        storage= strtok(NULL,delimiter);
-        date->tm_year  = atoi(storage);
+        storage = strtok(NULL, delimiter);
+        date->tm_mon = atoi(storage);
+        storage = strtok(NULL, delimiter);
+        date->tm_year = atoi(storage);
 
 
-
-        if(validateDate(*date,nowtime)==0)
-        {
-            date_t=mkgmtime(date);
-            insertElement(list, date_t, appointmentBezeichnung);
-        }
+        if (validateDate(*date, nowtime) == 0) {
+            date_t = mkgmtime(date);
+            list = insertElement(list, date_t, appointmentBezeichnung);
 
         }
+
     }
-
+    fclose(file);
+    return list;
+}
 
 
 void printList(List list, int day, int mon, int year) {
@@ -227,58 +246,35 @@ void printList(List list, int day, int mon, int year) {
     } else {
 
 
-        time_t inputconverted=time(NULL);
+        time_t inputconverted = time(NULL);
         struct tm *input = localtime(&inputconverted);
 
-       /* input->tm_isdst=1;
-        input->tm_wday=1;
-        input->tm_yday=1;*/
+        /* input->tm_isdst=1;
+         input->tm_wday=1;
+         input->tm_yday=1;*/
         input->tm_mday = day;
         input->tm_mon = mon;
         input->tm_year = year;
-        input->tm_hour=0;
-        input->tm_min=0;
-        input->tm_sec=0;
+        input->tm_hour = 0;
+        input->tm_min = 0;
+        input->tm_sec = 0;
 
         inputconverted = mkgmtime(*input);
 
 
-
-        while(e!=e->next)
-            if(inputconverted<e->appointment->start<(inputconverted+60*60*24))
+        while (e != e->next)
+            if (inputconverted < e->appointment->start < (inputconverted + 60 * 60 * 24))
 
 
                 printAppointment(e);
 
-
-
-        printf("ghj");
-/*
-        int zeitVerganngenAppointment = (day + mon * 30 + year * 365) * 24;
-        if (mon == 1 || mon == 3 || mon == 5 || mon == 7 || mon == 9 || mon == 11)
-            zeitVerganngenAppointment+=mon*31*24;
-        if(mon==4 || mon == 6 || mon == 8 || mon == 10 || mon == 12)
-            zeitVerganngenAppointment+=mon*30*24;
-        if(mon==2)
-            if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
-                zeitVerganngenAppointment+=mon*12*27*/
-
-
-
-
-        /* while (e != e->next) {
-             if (nowtime->tm_year == date.tm_year && nowtime->tm_mon == date.tm_mon && nowtime->tm_mday == date.tm_mday)
-                 printf("Appointment %s ist am %d", e->appointment->description, e->appointment->start);
-
-         }*/
 
     }
 
 
 }
 
-time_t mkgmtime(const struct tm *tm)
-{
+time_t mkgmtime(const struct tm *tm) {
     // Month-to-day offset for non-leap-years.
     static const int month_day[12] =
             {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
@@ -303,32 +299,6 @@ time_t mkgmtime(const struct tm *tm)
                                         - (year_for_leap - 1) / 100                 // Except centuries...
                                         + (year_for_leap + 299) / 400)));           // Except 400s.
     return rt < 0 ? -1 : rt;
-}
-
-
-
-
-List *insertElement(List *list, time_t time1, char *name) {
-    //time_t dateconv = mktime(&date);
-
-
-    Element *p = list->head;
-
-    while (p->next != p->next->next &&
-           p->next->appointment->start < time1)
-        p = p->next;
-
-
-    Appointment *appointment = malloc(sizeof(Appointment));
-    appointment->start = time1;
-    appointment->description = name;
-
-    Element *e = malloc(sizeof(Element));
-    e->appointment = appointment;
-    e->next = p->next;
-    p->next = e;
-
-    return list;
 }
 
 
@@ -409,6 +379,53 @@ List *clearList(List *list) {
             free(e);
         }
     }
+    return list;
+}
+
+void writeFile(List *list) {
+    File *file;
+    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "r");
+    if (file != NULL) {
+
+        struct tm *date;
+        time_t time;
+
+
+        Element *e;
+        e = list->head->next;
+
+
+        while (e != e->next) {
+
+            time = e->appointment->start;
+            date = localtime(&time);
+            e = e->next;
+        }
+
+    } else
+        perror("Daten werden nicht gespeichert!");
+}
+
+
+List *insertElement(List *list, time_t time1, char *name1) {
+    time_t time = time1;
+    char *name = malloc(sizeof(name1));
+    name = name1;
+    Element *p = list->head;
+
+    while (p->next != p->next->next && p->next->appointment->start < time1)
+        p = p->next;
+
+
+    Appointment *appointment = malloc(sizeof(Appointment));
+    appointment->start = time1;
+    appointment->description = name;
+
+    Element *e = malloc(sizeof(Element));
+    e->appointment = appointment;
+    e->next = p->next;
+    p->next = e;
+
     return list;
 }
 
