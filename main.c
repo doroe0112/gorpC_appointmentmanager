@@ -7,13 +7,14 @@
 #include <math.h>
 #include <errno.h>
 
+//initialisierung Struktur
 typedef struct {
     time_t start;               //die müssen definiert werden, wenn das Element erstellt wird
     char *description;
 } Appointment;
 
 typedef struct Element {
-    Appointment *appointment;           //muss mit dem zuständigen Appointment verknüpft werden -> Name == deklarationsname
+    Appointment *appointment;
     struct Element *next;
 } Element;
 
@@ -22,7 +23,7 @@ typedef struct {
 } List;
 
 
-//typedef struct List;
+//Deklaration Variablen und Methoden
 
 typedef struct File File;
 
@@ -53,10 +54,25 @@ time_t mkgmtime();
 
 
 int main() {
-    //perror("dies ist ein Fehlertext");
+
+    time_t test;
+    struct tm *testtm;
+    struct tm *test2tm;
+
+    testtm->tm_mon=06;
+    testtm->tm_year=2022;
+
+    test=mktime(testtm);
+
+    test2tm= gmtime(&test);
 
 
-    //Daten einlesen
+
+
+
+
+
+    //Deklaration Variablen und Zuweisung Zeitvariable
     setbuf(stdout, 0);
 
     bool listerstellt = false;
@@ -67,10 +83,12 @@ int main() {
     nowtime->tm_year += 1900;
 
     list = createList();
-    list = readFile(list, rawtime, *nowtime);
+    //list = readFile(list, rawtime, *nowtime);
 
 
-    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
+
+    //Anfang Hauptmenü-Loop
+    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t\t->help\n");
 
     char buf[50];
 
@@ -78,12 +96,12 @@ int main() {
         printf("==============\n");
         gets(buf);
 
-
+        //Das Anzeiegn aller Termine am aktuellen Tag
         if (strcmp("showToday", buf) == 0) {
-            printList(list, 0, 0, 0);     //überarbeiten!!!!
+            printList(list, 0, 0, 0);
         } else {
 
-
+            //Das Anzeigen aller Termina an einem bestimmten Tag, den der User über die Konsole eingibt.
             if (strcmp("show", buf) == 0) {
                 int day;
                 int month;
@@ -92,14 +110,14 @@ int main() {
                 printList(list, day, month, year);
             } else {
 
-
+                //Das Anzeigen der aktuellen Liste
                 if (strcmp("list", buf) == 0) {
                     Element *e = list->head->next;
                     while (e != e->next)
                         printAppointment(e);
                 } else {
 
-
+                    //Einfügen eines neuen Termines; daten werden vom User eingegeben.
                     if (strcmp("new", buf) == 0) {
                         time_t nothing = time(NULL);
                         struct tm *date = localtime(&nothing);
@@ -129,14 +147,22 @@ int main() {
                         }
                     } else {
 
-
+                        //Suchen eines termins anhand eingabe vom User
                         if (strcmp("search", buf) == 0) {
+                            printf("Appointment: ");
                             char *appointmentBezeichnung;
                             gets(appointmentBezeichnung);
-                            printAppointment(findElement(list, appointmentBezeichnung));
+                            Element *e;
+                            e = findElement(list, appointmentBezeichnung);
+
+                            if(e!=NULL)
+                                printAppointment(e);
+                            else
+                                printf("Couldn't find appointment.");
                         } else {
 
 
+                            //einen Termin löschen
                             if (strcmp("delete", buf) == 0) {
                                 char *appointmentBezeichnung;
                                 gets(appointmentBezeichnung);
@@ -144,11 +170,13 @@ int main() {
                             } else {
 
 
+                                //Alle termine löschen
                                 if (strcmp("deleteList", buf) == 0) {
                                     list = clearList(list);
                                 } else {
 
 
+                                    //Programm beenden && speichern && liste freigeben
                                     if (strcmp("quit", buf) == 0) {
                                         writeFile(list);
                                         //Liste speichern
@@ -160,10 +188,11 @@ int main() {
                                     } else {
 
 
+                                        //Error handling bei falscher Eingabe
                                         if (strcmp("help", buf) == 0) {
-                                            printf("\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
+                                            printf("options:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t->help\n");
                                         } else {
-                                            perror("Input Invalid.");
+                                            //printf("Invalid Input. Try 'help'.\n");
                                         }
                                     }
                                 }
@@ -173,18 +202,14 @@ int main() {
                 }
             }
         }
-
-
     } while (true);
 
 
 }
 
 void printAppointment(const Element *e) {
-    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t%s\nnext Element:\t%s\n===================================\n",
-           e->appointment->description,
-           ctime(&e->appointment->start),
-           e->next->appointment->description);
+    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t",
+           e->appointment->description);
 }
 
 
@@ -195,7 +220,7 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
     Element *e;
     e = list->head->next;
 
-    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "r");
+    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
 
     if (file == NULL) {
         perror("error by reading or initialising the file.");
@@ -384,7 +409,7 @@ List *clearList(List *list) {
 
 void writeFile(List *list) {
     File *file;
-    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "r");
+    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
     if (file != NULL) {
 
         struct tm *date;
@@ -432,7 +457,9 @@ List *insertElement(List *list, time_t time1, char *name1) {
 Element *findElement(List list, char *name) {
     Element *e = list.head->next;
     while (e != e->next) {
-        if (e->appointment->description == name) return e;
+        //if (e->appointment->description == name)
+        if (strcmp(name, e->appointment->description) == 0)
+            return e;
         e = e->next;
     }
     return NULL;
