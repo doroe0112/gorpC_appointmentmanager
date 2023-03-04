@@ -54,20 +54,22 @@ time_t mkgmtime();
 
 
 int main() {
+/*
+    time_t test=time(NULL);
 
-    time_t test;
-    struct tm *testtm;
+    struct tm *testtm = localtime(&test);
     struct tm *test2tm;
 
     testtm->tm_mon=06;
     testtm->tm_year=2022;
 
-    test=mktime(testtm);
+    test=mktime(&testtm);
 
     test2tm= gmtime(&test);
 
 
 
+*/
 
 
 
@@ -83,8 +85,7 @@ int main() {
     nowtime->tm_year += 1900;
 
     list = createList();
-    //list = readFile(list, rawtime, *nowtime);
-
+    list = readFile(list, rawtime, *nowtime);
 
 
     //Anfang Hauptmenü-Loop
@@ -155,7 +156,7 @@ int main() {
                             Element *e;
                             e = findElement(list, appointmentBezeichnung);
 
-                            if(e!=NULL)
+                            if (e != NULL)
                                 printAppointment(e);
                             else
                                 printf("Couldn't find appointment.");
@@ -220,7 +221,7 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
     Element *e;
     e = list->head->next;
 
-    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
+    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "r");
 
     if (file == NULL) {
         perror("error by reading or initialising the file.");
@@ -228,12 +229,13 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
     }
 
 
-    char string[100];
-
     char *appointmentBezeichnung;
     char *storage;
 
-    while (fgets(string, 100, file)) {
+    char string[500];
+
+    while (fgets(string, 500, file)) {
+
         time_t date_t;
         date_t = time(NULL);
         struct tm *date;
@@ -255,7 +257,7 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
             list = insertElement(list, date_t, appointmentBezeichnung);
 
         }
-
+        //free(string);
     }
     fclose(file);
     return list;
@@ -433,9 +435,7 @@ void writeFile(List *list) {
 
 
 List *insertElement(List *list, time_t time1, char *name1) {
-    time_t time = time1;
-    char *name = malloc(sizeof(name1));
-    name = name1;
+
     Element *p = list->head;
 
     while (p->next != p->next->next && p->next->appointment->start < time1)
@@ -444,7 +444,7 @@ List *insertElement(List *list, time_t time1, char *name1) {
 
     Appointment *appointment = malloc(sizeof(Appointment));
     appointment->start = time1;
-    appointment->description = name;
+    appointment->description = name1;
 
     Element *e = malloc(sizeof(Element));
     e->appointment = appointment;
