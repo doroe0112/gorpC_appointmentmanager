@@ -5,7 +5,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define atoa(x) #x
 
 //initialisierung Struktur
 typedef struct {
@@ -29,7 +28,7 @@ typedef struct File File;
 
 int validateDate(struct tm, struct tm);
 
-List *insertElement();
+List *insertElement(List *list, time_t time1, char *name1);
 
 List *createList();
 
@@ -41,7 +40,7 @@ List *deleteElement();
 
 void printList();
 
-void writeFile(List *list);
+void writeFile(List *list, char *datei);
 
 
 List *readFile();
@@ -65,20 +64,26 @@ int main() {
     nowtime = localtime(&rawtime);
     nowtime->tm_year += 1900;
 
-    list = createList();
-    list = readFile(list, rawtime, *nowtime);
+
+
+
+    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n=============================\nPlease set up the standart-file direction. Use 'x' for standart: 'C:\\Users\\User\\Desktop\\termine.txt'");
+    char datei[50];
+
+    gets(datei);
+    if(strcmp("x", datei) == 0) {
+        strcpy(datei,"C:\\Users\\User\\Desktop\\termine.txt");
+
+    }
+        list = createList();
+    list = readFile(list, rawtime, *nowtime,datei);
     if (list == NULL)
         list = createList();
 
 
 
 
-    char *datei;
-    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n=============================\nPlease set up the standart-file direction. Use 'x' for standart: 'C:\\Users\\User\\Desktop\\termine.txt'");
-    gets(datei);
-    if(strcmp("x", datei) == 0)
-        datei="C:\\Users\\User\\Desktop\\termine.txt";
-    //datei="C:\Users\User\Desktop\termine.txt";
+
 
 
 
@@ -186,12 +191,11 @@ int main() {
 
                                     //Programm beenden && speichern && liste freigeben
                                     if (strcmp("quit", buf) == 0) {
-                                        writeFile(list);
+                                        writeFile(list,datei);
                                         //Liste speichern
                                         list = clearList(list);
                                         free(list->head);
                                         free(list->tail);
-
                                         exit(0);
                                     } else {
 
@@ -227,19 +231,19 @@ void printAppointment(const Element *e) {
 }
 
 
-List *readFile(List *list, time_t rawtime, struct tm nowtime) {
+List *readFile(List *list, time_t rawtime, struct tm nowtime,char *datei) {
     FILE *file;
     char *line[300];
     struct tm date;
     Element *e;
     e = list->head->next;
 
-    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
+    file = fopen(datei, "r");
 
     if (file == NULL) {
-        file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "w");
+        file = fopen(datei, "w");
         fclose(file);
-        file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
+        file = fopen(datei, "r");
         if (file == NULL) {
             perror("error by reading or initialising the file.");
 
@@ -435,9 +439,9 @@ List *clearList(List *list) {
     return list;
 }
 
-void writeFile(List *list) {
+void writeFile(List *list,char *datei) {
     File *file;
-    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "w+");
+    file = fopen(datei, "w+");
     if (file != NULL) {
 
         struct tm *date;
