@@ -49,7 +49,7 @@ void printAppointment(const Element *e);
 
 List *list;
 
-time_t mkgmtime();
+
 
 
 int main() {
@@ -148,7 +148,7 @@ int main() {
 
                         switch (validateDate(*date, *nowtime)) {
                             case 0:
-                                nothing = mkgmtime(date);
+                                nothing = mktime(date);
                                 list = insertElement(list, nothing, appointmentBezeichnung);
                                 break;
                             case 1:
@@ -278,7 +278,7 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime,char *datei) {
         date->tm_hour = atoi(storage);
 
         if (validateDate(*date, nowtime) == 0) {
-            date_t = mkgmtime(date);
+            date_t = mktime(date);
             list = insertElement(list, date_t, appointmentBezeichnung);
 
         }
@@ -315,7 +315,7 @@ void printList(List list, int day, int mon, int year) {
         input->tm_min = 0;
         input->tm_sec = 0;
 
-        inputconverted = mkgmtime(*input);
+        inputconverted = mktime(input);
 
 
         while (e->next != e->next->next) {
@@ -329,30 +329,6 @@ void printList(List list, int day, int mon, int year) {
 
 }
 
-//wandelt struct tm in time_t um da mktime probleme macht.
-time_t mkgmtime(const struct tm *tm) {
-    static const int month_day[12] =
-            {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-
-    int month = tm->tm_mon % 12;
-    int year = tm->tm_year + tm->tm_mon / 12;
-    if (month < 0) {
-        month += 12;
-        --year;
-    }
-
-    const int year_for_leap = (month > 1) ? year + 1 : year;
-
-    time_t rt = tm->tm_sec
-                + 60 * (tm->tm_min
-                        + 60 * (tm->tm_hour
-                                + 24 * (month_day[month] + tm->tm_mday - 1
-                                        + 365 * (year - 70)
-                                        + (year_for_leap - 69) / 4
-                                        - (year_for_leap - 1) / 100
-                                        + (year_for_leap + 299) / 400)));
-    return rt < 0 ? -1 : rt;
-}
 
 
 int validateDate(struct tm date, struct tm nowtime) {
