@@ -7,7 +7,7 @@
 
 //initialisierung Struktur
 typedef struct {
-    time_t start;               //die müssen definiert werden, wenn das Element erstellt wird
+    time_t start;
     char *description;
 } Appointment;
 
@@ -35,7 +35,7 @@ Element *findElement();
 
 List *clearList(List *list);
 
-void deleteElement();
+List *deleteElement();
 
 void printList();
 
@@ -64,8 +64,8 @@ int main() {
     test=mktime(&testtm);
 
     test2tm= gmtime(&test);
-
 */
+
 
 
 
@@ -143,7 +143,8 @@ int main() {
 
                         switch (validateDate(*date, *nowtime)) {
                             case 0:
-                                list = insertElement(list, date, appointmentBezeichnung);
+                                nothing=mkgmtime(date);
+                                list = insertElement(list, nothing, appointmentBezeichnung);
                                 break;
                             case 1:
                                 printf("Formfehler in Datumsformat");
@@ -173,7 +174,7 @@ int main() {
                             if (strcmp("delete", buf) == 0) {
                                 char *appointmentBezeichnung;
                                 gets(appointmentBezeichnung);
-                                deleteElement(list, appointmentBezeichnung);
+                                list=deleteElement(list, appointmentBezeichnung);
                             } else {
 
 
@@ -220,6 +221,7 @@ void printAppointment(const Element *e) {
     eingangszeit = e->appointment->start;
     time(&eingangszeit);
     timme = localtime(&eingangszeit);
+
     printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t",
            e->appointment->description);
 }
@@ -477,13 +479,15 @@ List *insertElement(List *list, time_t time1, char *name1) {
 
     Element *p = list->head;
 
-    while (p->next != p->next->next && p->next->appointment->start < time1)
-        p = p->next;
+    while (p->next != p->next->next && p->next->appointment->start < time1){
+        p = p->next;}
 
 
     Appointment *appointment = malloc(sizeof(Appointment));
     appointment->start = time1;
-    appointment->description = name1;
+    appointment->description = malloc(strlen(name1)+1);
+    memcpy(appointment->description,name1,strlen(name1)+1);
+
 
     Element *e = malloc(sizeof(Element));
     e->appointment = appointment;
@@ -494,9 +498,10 @@ List *insertElement(List *list, time_t time1, char *name1) {
 }
 
 //Gebe ein Element zurück, welches so heißt wie der übergabeparameter
-Element *findElement(List list, char *name) {
-    Element *e = list.head->next;
-    while (e != e->next) {
+Element *findElement(List *list, char *name) {
+    Element *e = list->head;
+    while (e->next != e->next->next) {
+        e = e->next;
         //if (e->appointment->description == name)
         if (strcmp(name, e->appointment->description) == 0)
             return e;
@@ -506,13 +511,14 @@ Element *findElement(List list, char *name) {
 }
 
 //Lösche ein ELement, mit dem übergebenem Namen.
-void deleteElement(List list, char *name) {
-    Element *p = list.head;
+List *deleteElement(List *list, char *name) {
+    Element *p = list->head;
     while (p->next != p->next->next) {
-        if (p->next->appointment->description == name) {
+        if (strcmp(name, p->next->appointment->description) == 0) {
             Element *e = p->next;
             p->next = e->next;
             free(e);
         } else p = p->next;
     }
+    return(list);
 }
