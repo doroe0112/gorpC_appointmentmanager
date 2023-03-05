@@ -5,6 +5,8 @@
 #include <string.h>
 #include <errno.h>
 
+#define atoa(x) #x
+
 //initialisierung Struktur
 typedef struct {
     time_t start;
@@ -52,25 +54,6 @@ time_t mkgmtime();
 
 
 int main() {
-/*
-    time_t test=time(NULL);
-
-    struct tm *testtm = localtime(&test);
-    struct tm *test2tm;
-
-    testtm->tm_mon=06;
-    testtm->tm_year=2022;
-
-    test=mktime(&testtm);
-
-    test2tm= gmtime(&test);
-*/
-
-
-
-
-
-
 
     //Deklaration Variablen und Zuweisung Zeitvariable
     setbuf(stdout, 0);
@@ -84,10 +67,17 @@ int main() {
 
     list = createList();
     list = readFile(list, rawtime, *nowtime);
+    if (list == NULL)
+        list = createList();
+
+
 
 
     //Anfang Hauptmenü-Loop
-    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t\t->help\n");
+    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n=============================\n");
+    printf("Today's Appointments:\n");
+    printList(list, nowtime->tm_mday, nowtime->tm_mon, nowtime->tm_year);
+    printf("\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t\t-help\n");
 
     char buf[50];
 
@@ -143,7 +133,7 @@ int main() {
 
                         switch (validateDate(*date, *nowtime)) {
                             case 0:
-                                nothing=mkgmtime(date);
+                                nothing = mkgmtime(date);
                                 list = insertElement(list, nothing, appointmentBezeichnung);
                                 break;
                             case 1:
@@ -158,7 +148,7 @@ int main() {
                         //Suchen eines termins anhand eingabe vom User
                         if (strcmp("search", buf) == 0) {
                             printf("Appointment: ");
-                            char *appointmentBezeichnung;
+                            char appointmentBezeichnung[500];
                             gets(appointmentBezeichnung);
                             Element *e;
                             e = findElement(list, appointmentBezeichnung);
@@ -174,7 +164,7 @@ int main() {
                             if (strcmp("delete", buf) == 0) {
                                 char *appointmentBezeichnung;
                                 gets(appointmentBezeichnung);
-                                list=deleteElement(list, appointmentBezeichnung);
+                                list = deleteElement(list, appointmentBezeichnung);
                             } else {
 
 
@@ -222,8 +212,8 @@ void printAppointment(const Element *e) {
     time(&eingangszeit);
     timme = localtime(&eingangszeit);
 
-    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t",
-           e->appointment->description);
+    printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:%s\t",
+           e->appointment->description, ctime(&e->appointment->start));
 }
 
 
@@ -242,6 +232,7 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
         file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
         if (file == NULL) {
             perror("error by reading or initialising the file.");
+
             return list;
         }
     }
@@ -258,7 +249,6 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
         date_t = time(NULL);
         struct tm *date;
         date = localtime(&date_t);
-        printf("%s\n", string);
 
         char delimiter[] = ";";
         appointmentBezeichnung = strtok(string, delimiter);
@@ -268,33 +258,20 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
         date->tm_mon = atoi(storage);
         storage = strtok(NULL, delimiter);
         date->tm_year = atoi(storage);
-
+        storage = strtok(NULL, delimiter);
+        date->tm_min = atoi(storage);
+        storage = strtok(NULL, delimiter);
+        date->tm_hour = atoi(storage);
 
         if (validateDate(*date, nowtime) == 0) {
             date_t = mkgmtime(date);
             list = insertElement(list, date_t, appointmentBezeichnung);
 
-
-            /*Element *p = list->head;
-
-            while (p->next != p->next->next && p->next->appointment->start < date_t)
-                p = p->next;
-
-
-            Appointment *appointment = malloc(sizeof(Appointment));
-            appointment->start = date_t;
-            appointment->description = appointmentBezeichnung;
-
-            Element *e = malloc(sizeof(Element));
-            e->appointment = appointment;
-            e->next = p->next;
-            p->next = e;*/
-
-
         }
-        //free(string);
     }
     fclose(file);
+
+
     return list;
 }
 
@@ -316,9 +293,7 @@ void printList(List list, int day, int mon, int year) {
         time_t inputconverted = time(NULL);
         struct tm *input = localtime(&inputconverted);
 
-        /* input->tm_isdst=1;
-         input->tm_wday=1;
-         input->tm_yday=1;*/
+
         input->tm_mday = day;
         input->tm_mon = mon;
         input->tm_year = year;
@@ -329,11 +304,9 @@ void printList(List list, int day, int mon, int year) {
         inputconverted = mkgmtime(*input);
 
 
-        while (&e->next != &e->next->next) {
+        while (e->next != e->next->next) {
             e = e->next;
-            if (inputconverted < e->appointment->start < (inputconverted + 60 * 60 * 24))
-
-
+            if (inputconverted <= e->appointment->start <= (inputconverted + 60 * 60 * 24))
                 printAppointment(e);
         }
 
@@ -401,7 +374,7 @@ int validateDate(struct tm date, struct tm nowtime) {
         }
     }
 
-    //Üverorüfen ob Uhrzeit stimmt
+    //Überprüfen ob Uhrzeit stimmt
     if (0 <= date.tm_hour <= 24 && status == 0) {
         if (0 <= date.tm_min <= 59) {
             status = 0;
@@ -444,6 +417,8 @@ List *clearList(List *list) {
         while (p != p->next) {
             Element *e = p;
             p = p->next;
+            free(e->appointment->description);
+            free(e->appointment);
             free(e);
         }
     }
@@ -452,7 +427,7 @@ List *clearList(List *list) {
 
 void writeFile(List *list) {
     File *file;
-    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
+    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "w+");
     if (file != NULL) {
 
         struct tm *date;
@@ -460,33 +435,39 @@ void writeFile(List *list) {
 
 
         Element *e;
-        e = list->head->next;
+        e = list->head;
 
 
-        while (e != e->next) {
-
+        while (e->next != e->next->next) {
+            e = e->next;
             time = e->appointment->start;
             date = localtime(&time);
-            e = e->next;
+            date->tm_min, date->tm_hour;
+
+            fprintf(file, "%s;%d;%d;%d;%d;%d\n", e->appointment->description, date->tm_mday, date->tm_mon,
+                    date->tm_year, date->tm_hour, date->tm_min);
         }
+        fclose(file);
 
     } else
-        perror("Daten werden nicht gespeichert!");
+        perror("Daten wurden nicht gespeichert!");
 }
+
 
 //Füge ein Element in die Liste ein.
 List *insertElement(List *list, time_t time1, char *name1) {
 
     Element *p = list->head;
 
-    while (p->next != p->next->next && p->next->appointment->start < time1){
-        p = p->next;}
+    while (p->next != p->next->next && p->next->appointment->start < time1) {
+        p = p->next;
+    }
 
 
     Appointment *appointment = malloc(sizeof(Appointment));
     appointment->start = time1;
-    appointment->description = malloc(strlen(name1)+1);
-    memcpy(appointment->description,name1,strlen(name1)+1);
+    appointment->description = malloc(strlen(name1) + 1);
+    memcpy(appointment->description, name1, strlen(name1) + 1);
 
 
     Element *e = malloc(sizeof(Element));
@@ -517,8 +498,11 @@ List *deleteElement(List *list, char *name) {
         if (strcmp(name, p->next->appointment->description) == 0) {
             Element *e = p->next;
             p->next = e->next;
+
+            free(e->appointment->description);
+            free(e->appointment);
             free(e);
         } else p = p->next;
     }
-    return(list);
+    return (list);
 }
