@@ -65,19 +65,10 @@ int main() {
 
     test2tm= gmtime(&test);
 
-
-
 */
 
-    time_t finalTime = time(NULL);
-    struct tm *timeStamp = localtime(&finalTime);
-    timeStamp->tm_mday = 2;
-    timeStamp->tm_mon = 11;
-    timeStamp->tm_year = 2025;
-    timeStamp->tm_hour = 7;
-    timeStamp->tm_min = 22;
-    timeStamp->tm_sec = 0;
-    finalTime = mktime(timeStamp);
+
+
 
 
 
@@ -106,7 +97,7 @@ int main() {
 
         //Das Anzeiegn aller Termine am aktuellen Tag
         if (strcmp("showToday", buf) == 0) {
-            printList(list, 0, 0, 0);
+            printList(list, nowtime->tm_mday, nowtime->tm_mon, nowtime->tm_year);
         } else {
 
             //Das Anzeigen aller Termina an einem bestimmten Tag, den der User über die Konsole eingibt.
@@ -120,9 +111,11 @@ int main() {
 
                 //Das Anzeigen der aktuellen Liste
                 if (strcmp("list", buf) == 0) {
-                    Element *e = list->head->next;
-                    while (e != e->next)
+                    Element *e = list->head;
+                    while (e->next != e->next->next) {
+                        e = e->next;
                         printAppointment(e);
+                    }
                 } else {
 
                     //Einfügen eines neuen Termines; daten werden vom User eingegeben.
@@ -132,12 +125,18 @@ int main() {
                         int day;
                         int month;
                         int year;
-                        char appointmentBezeichnung[100];
+                        int hour;
+                        int min;
+                        char appointmentBezeichnung[500];
                         printf("Please Input your appointment description:  ");
                         gets(appointmentBezeichnung);
                         printf("Please Input the day(dd.mm.yyyy): ");
                         scanf("%d.%d.%d", &day, &month, &year);
+                        printf("Please Input the Time(hh:mm): ");
+                        scanf("%d:%d", &hour, &min);
 
+                        date->tm_min = min;
+                        date->tm_hour = hour;
                         date->tm_mday = day;
                         date->tm_mon = month;
                         date->tm_year = year;
@@ -216,6 +215,11 @@ int main() {
 }
 
 void printAppointment(const Element *e) {
+    struct tm *timme;
+    time_t eingangszeit;
+    eingangszeit=e->appointment->start;
+    time(&eingangszeit);
+    timme = localtime(&eingangszeit);
     printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t",
            e->appointment->description);
 }
@@ -228,11 +232,16 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
     Element *e;
     e = list->head->next;
 
-    file = fopen("C:\\Users\\User\\Desktop\\datei.txt", "r");
+    file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
 
     if (file == NULL) {
-        perror("error by reading or initialising the file.");
-        return list;
+        file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "w");
+        fclose(file);
+        file = fopen("C:\\Users\\User\\Desktop\\termine.txt", "r");
+        if (file == NULL) {
+            perror("error by reading or initialising the file.");
+            return list;
+        }
     }
 
 
@@ -261,10 +270,10 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
 
         if (validateDate(*date, nowtime) == 0) {
             date_t = mkgmtime(date);
-            //list = insertElement(list, date_t, appointmentBezeichnung);
+            list = insertElement(list, date_t, appointmentBezeichnung);
 
 
-            Element *p = list->head;
+            /*Element *p = list->head;
 
             while (p->next != p->next->next && p->next->appointment->start < date_t)
                 p = p->next;
@@ -277,12 +286,11 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
             Element *e = malloc(sizeof(Element));
             e->appointment = appointment;
             e->next = p->next;
-            p->next = e;
-
+            p->next = e;*/
 
 
         }
-        free(string);
+        //free(string);
     }
     fclose(file);
     return list;
@@ -292,12 +300,14 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
 void printList(List list, int day, int mon, int year) {
     Element *e = list.head->next;
 
+
+    //wenn nur 0len übergeben werden wird jedes Appointment ausgegeben.
     if (day == 0 && mon == 0 && year == 0) {
         while (e != e->next)
             printAppointment(e);
     } else {
 
-
+//folgendes gibt die Termine des eingegeben Tages aus.
         time_t inputconverted = time(NULL);
         struct tm *input = localtime(&inputconverted);
 
@@ -314,7 +324,7 @@ void printList(List list, int day, int mon, int year) {
         inputconverted = mkgmtime(*input);
 
 
-        while (e != e->next)
+        while (&e != &e->next)
             if (inputconverted < e->appointment->start < (inputconverted + 60 * 60 * 24))
 
 
@@ -326,30 +336,28 @@ void printList(List list, int day, int mon, int year) {
 
 }
 
+//wandelt struct tm in time_t um da mktime probleme macht.
 time_t mkgmtime(const struct tm *tm) {
-    // Month-to-day offset for non-leap-years.
     static const int month_day[12] =
             {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-    // Most of the calculation is easy; leap years are the main difficulty.
     int month = tm->tm_mon % 12;
     int year = tm->tm_year + tm->tm_mon / 12;
-    if (month < 0) {   // Negative values % 12 are still negative.
+    if (month < 0) {
         month += 12;
         --year;
     }
 
-    // This is the number of Februaries since 1900.
     const int year_for_leap = (month > 1) ? year + 1 : year;
 
-    time_t rt = tm->tm_sec                             // Seconds
-                + 60 * (tm->tm_min                          // Minute = 60 seconds
-                        + 60 * (tm->tm_hour                         // Hour = 60 minutes
-                                + 24 * (month_day[month] + tm->tm_mday - 1  // Day = 24 hours
-                                        + 365 * (year - 70)                         // Year = 365 days
-                                        + (year_for_leap - 69) / 4                  // Every 4 years is     leap...
-                                        - (year_for_leap - 1) / 100                 // Except centuries...
-                                        + (year_for_leap + 299) / 400)));           // Except 400s.
+    time_t rt = tm->tm_sec
+                + 60 * (tm->tm_min
+                        + 60 * (tm->tm_hour
+                                + 24 * (month_day[month] + tm->tm_mday - 1
+                                        + 365 * (year - 70)
+                                        + (year_for_leap - 69) / 4
+                                        - (year_for_leap - 1) / 100
+                                        + (year_for_leap + 299) / 400)));
     return rt < 0 ? -1 : rt;
 }
 
@@ -359,7 +367,7 @@ int validateDate(struct tm date, struct tm nowtime) {
     int status = 1; //status 0: Datum gültig//status 1: datum ungültig // status 2: datum veraltet //status 4 = zwischenstatus
 
 
-//überprüfen, ob das Datum/Uhrzeit stimmt
+//überprüfen, ob das Datum stimmt
     if (date.tm_mon == 1 || date.tm_mon == 3 || date.tm_mon == 5 || date.tm_mon == 7 || date.tm_mon == 9 ||
         date.tm_mon == 11) {
         if (0 < date.tm_mday <= 31)
@@ -387,6 +395,7 @@ int validateDate(struct tm date, struct tm nowtime) {
         }
     }
 
+    //Üverorüfen ob Uhrzeit stimmt
     if (0 <= date.tm_hour <= 24 && status == 0) {
         if (0 <= date.tm_min <= 59) {
             status = 0;
@@ -408,6 +417,7 @@ int validateDate(struct tm date, struct tm nowtime) {
     return status;
 }
 
+//erstelle neue head/tail Elemente und allokiere den entsprechenen Speicher.
 List *createList() {
     Element *head = malloc(sizeof(Element));
     Element *tail = malloc(sizeof(Element));
@@ -421,7 +431,7 @@ List *createList() {
     return list;
 }
 
-
+//Lösche alle nicht-Pseudo Elemente der Struktur.
 List *clearList(List *list) {
     if (list != NULL) {
         Element *p = list->head->next;
@@ -458,7 +468,7 @@ void writeFile(List *list) {
         perror("Daten werden nicht gespeichert!");
 }
 
-
+//Füge ein Element in die Liste ein.
 List *insertElement(List *list, time_t time1, char *name1) {
 
     Element *p = list->head;
@@ -479,6 +489,7 @@ List *insertElement(List *list, time_t time1, char *name1) {
     return list;
 }
 
+//Gebe ein Element zurück, welches so heißt wie der übergabeparameter
 Element *findElement(List list, char *name) {
     Element *e = list.head->next;
     while (e != e->next) {
@@ -490,7 +501,7 @@ Element *findElement(List list, char *name) {
     return NULL;
 }
 
-
+//Lösche ein ELement, mit dem übergebenem Namen.
 void deleteElement(List list, char *name) {
     Element *p = list.head;
     while (p->next != p->next->next) {
