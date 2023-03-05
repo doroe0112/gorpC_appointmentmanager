@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <utime.h>
 #include <time.h>
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
 #include <errno.h>
 
 //initialisierung Struktur
@@ -71,6 +69,15 @@ int main() {
 
 */
 
+    time_t finalTime = time(NULL);
+    struct tm *timeStamp = localtime(&finalTime);
+    timeStamp->tm_mday = 2;
+    timeStamp->tm_mon = 11;
+    timeStamp->tm_year = 2025;
+    timeStamp->tm_hour = 7;
+    timeStamp->tm_min = 22;
+    timeStamp->tm_sec = 0;
+    finalTime = mktime(timeStamp);
 
 
 
@@ -254,10 +261,28 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
 
         if (validateDate(*date, nowtime) == 0) {
             date_t = mkgmtime(date);
-            list = insertElement(list, date_t, appointmentBezeichnung);
+            //list = insertElement(list, date_t, appointmentBezeichnung);
+
+
+            Element *p = list->head;
+
+            while (p->next != p->next->next && p->next->appointment->start < date_t)
+                p = p->next;
+
+
+            Appointment *appointment = malloc(sizeof(Appointment));
+            appointment->start = date_t;
+            appointment->description = appointmentBezeichnung;
+
+            Element *e = malloc(sizeof(Element));
+            e->appointment = appointment;
+            e->next = p->next;
+            p->next = e;
+
+
 
         }
-        //free(string);
+        free(string);
     }
     fclose(file);
     return list;
