@@ -73,13 +73,23 @@ int main() {
 
 
 
-    //Anfang Hauptmenü-Loop
-    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n=============================\n");
+    char *datei;
+    printf("Welcome to DAP\nDominiks Appointment Planner\n=============================\n=============================\nPlease set up the standart-file direction. Use 'x' for standart: 'C:\\Users\\User\\Desktop\\termine.txt'");
+    gets(datei);
+    if(strcmp("x", datei) == 0)
+        datei="C:\\Users\\User\\Desktop\\termine.txt";
+    //datei="C:\Users\User\Desktop\termine.txt";
+
+
+
+
+
     printf("Today's Appointments:\n");
     printList(list, nowtime->tm_mday, nowtime->tm_mon, nowtime->tm_year);
     printf("\n\noptions:\n\t->showToday - list all appointments today\n\t->show - list appointments on special day\n\t->list - show all appointments\n\t->new - create new appointment\n\t->search - searching for an appointment\n\t->delete - delete appointment\n\t->deleteList - Delete all Appointments\n\t->quit - save appointments and quit program\n\t\t-help\n");
 
     char buf[50];
+    //Anfang Hauptmenü-Loop
 
     do {
         printf("==============\n");
