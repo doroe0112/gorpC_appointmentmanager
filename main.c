@@ -217,7 +217,7 @@ int main() {
 void printAppointment(const Element *e) {
     struct tm *timme;
     time_t eingangszeit;
-    eingangszeit=e->appointment->start;
+    eingangszeit = e->appointment->start;
     time(&eingangszeit);
     timme = localtime(&eingangszeit);
     printf("\n===================================\nElement:\nBeschreibung:\t %s\nZeit:\t",
@@ -298,13 +298,16 @@ List *readFile(List *list, time_t rawtime, struct tm nowtime) {
 
 
 void printList(List list, int day, int mon, int year) {
-    Element *e = list.head->next;
+    Element *e = list.head;
 
 
     //wenn nur 0len übergeben werden wird jedes Appointment ausgegeben.
     if (day == 0 && mon == 0 && year == 0) {
-        while (e != e->next)
+        while (e->next != e->next->next) {
+            e = e->next;
             printAppointment(e);
+
+        }
     } else {
 
 //folgendes gibt die Termine des eingegeben Tages aus.
@@ -324,12 +327,13 @@ void printList(List list, int day, int mon, int year) {
         inputconverted = mkgmtime(*input);
 
 
-        while (&e != &e->next)
+        while (&e->next != &e->next->next) {
+            e = e->next;
             if (inputconverted < e->appointment->start < (inputconverted + 60 * 60 * 24))
 
 
                 printAppointment(e);
-
+        }
 
     }
 
